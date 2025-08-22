@@ -20,8 +20,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{02EA681E-C
 		04-api-endpoints.md = 04-api-endpoints.md
 		changelog.md = changelog.md
 		conventions.md = conventions.md
-		NN-feature-template.md = NN-feature-template.md
 		references.md = references.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "templates", "templates", "{8B438258-7925-45E3-B8E7-6185D8FCFF7D}"
+	ProjectSection(SolutionItems) = preProject
+		new-feature.md = new-feature.md
 	EndProjectSection
 EndProject
 Global
@@ -85,6 +89,9 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{8B438258-7925-45E3-B8E7-6185D8FCFF7D} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {915D9CF7-0793-42B3-829B-6E0BA32DB00A}
