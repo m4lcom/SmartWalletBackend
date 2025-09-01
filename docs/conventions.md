@@ -1,4 +1,4 @@
-﻿# Convenciones de trabajo
+﻿# Conventions
 
 ## Ramas
 - `main` → estable
@@ -6,6 +6,7 @@
 - `feature/*` → nuevas funcionalidades
 - `bugfix/*` → correcciones
 - `refactor/*` → reestructuración de código
+- `chore/*` → soporte, mantenimiento, tareas varias
 - `docs/*` → cambios de documentación
 
 ---
@@ -16,7 +17,7 @@
 - `docs:` cambios en documentación  
 - `refactor:` reestructuración de código  
 - `test:` pruebas  
-- `chore:` tareas varias
+- `chore:` soporte, tareas varias
 
 ---
 
