@@ -3,8 +3,8 @@
 ## Capas
 - `API` → Presentación y controladores.
 - `Application` → Casos de uso y lógica de negocio.
-- `Domain` → Entidades y reglas de dominio.
 - `Infrastructure` → Persistencia y acceso a datos.
+- `Domain` → Entidades y reglas de dominio.
 
 ---
 
@@ -24,12 +24,12 @@
          │
          ▼
 ┌────────────────────┐
-│   Application      │ → Use cases, interfaces, validations
+│   Infrastructure   │ → EF Core, repositories, external services
 └────────────────────┘
          │
          ▼
 ┌────────────────────┐
-│   Infrastructure   │ → EF Core, repositories, external services
+│   Application      │ → Use cases, interfaces, validations
 └────────────────────┘
          │
          ▼
