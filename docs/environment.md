@@ -86,14 +86,17 @@ Located in `src/SmartWalletAPI/` and contains non-sensitive configuration:
 ```
 using DotNetEnv;
 
-var builder = WebApplication.CreateBuilder(args);
+Env.TraversePath().Load(); // Busca .env hacia arriba
 
-// Load .env file from repo root
-Env.Load();
+var jwtSecret = Environment.GetEnvironmentVariable("JWT_SECRET");
+var dbPath = Environment.GetEnvironmentVariable("DB_PATH");
 
-// Inject sensitive values into configuration
-builder.Configuration["Jwt:Secret"] = Environment.GetEnvironmentVariable("JWT_SECRET");
-builder.Configuration["Database:ConnectionString"] = $"Data Source={Environment.GetEnvironmentVariable("DB_PATH")}";
+if (string.IsNullOrEmpty(jwtSecret) || string.IsNullOrEmpty(dbPath))
+    throw new InvalidOperationException("Faltan variables: JWT_SECRET o DB_PATH");
+
+builder.Configuration["Jwt:Key"] = jwtSecret;
+builder.Configuration["ConnectionStrings:DefaultConnection"] = $"Data Source={dbPath}";
+
 ```
 
 ---
