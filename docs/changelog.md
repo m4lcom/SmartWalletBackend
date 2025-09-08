@@ -2,8 +2,8 @@
 
 ---
 
-# 2025-08-22
-# model project-changelog
+## 2025-08-22
+### model project-changelog
 Este archivo registra, en orden cronológico, los cambios relevantes del proyecto.  
 Cada entrada debe incluir:
 
@@ -14,7 +14,7 @@ Cada entrada debe incluir:
 ---
 
 ## 2025-08-22
-# setup/project-initialization
+### setup/project-initialization
 - Instalación de paquetes básicos.
 - Creación del proyecto **SmartWallet** con estructura base de solución y proyectos.
 
@@ -24,7 +24,7 @@ Cada entrada debe incluir:
 ---
 
 ## 2025-08-31
-# config/project-structure-and-config-environment
+### config/project-structure-and-config-environment
 - Regeneración de `SmartWalletBackend.sln` con rutas físicas correctas.
 - Inclusión de archivos raíz como Solution Items: `.env`, `.gitignore`, `README.md`.
 - Incorporación de todos los archivos de `/docs/` como Solution Items bajo la carpeta lógica `docs`.
@@ -42,7 +42,7 @@ Cada entrada debe incluir:
 ---
 
 ## 2025-09-08
-# feature/domain-base-models
+### feature/domain-base-models
 Implementar la capa de dominio de SmartWallet con validaciones básicas usando DataAnnotations, sin introducir dependencias de infraestructura.
 - Creacion `Domain/Entities/User.cs`  
    - Añadido `[Key]`, `[Required]`, `[StringLength]` y `[EmailAddress]` a propiedades  
@@ -54,4 +54,15 @@ Implementar la capa de dominio de SmartWallet con validaciones básicas usando Da
    - Validar `Amount` con `[Range(0.01, double.MaxValue)]` y precisión decimal.
 
 ---
+
+## 2025-09-08
+### agregado de documentacion feature/domain-base-models
+- Documentación de la feature **domain-base-model** en `/docs/02-domain-base-model.md`:
+  - Objetivo de la feature y alcance.
+  - Pasos de implementación con detalle de cambios en `User`, `Wallet` y `Transaction`.
+  - Cambios previstos en base de datos.
+  - Ejemplos de uso en código.
+
+---
+
 
