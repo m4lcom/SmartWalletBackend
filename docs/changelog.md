@@ -1,5 +1,9 @@
 # Changelog – SmartWallet
 
+---
+
+# 2025-08-22
+# model project-changelog
 Este archivo registra, en orden cronológico, los cambios relevantes del proyecto.  
 Cada entrada debe incluir:
 
@@ -10,6 +14,7 @@ Cada entrada debe incluir:
 ---
 
 ## 2025-08-22
+# setup/project-initialization
 - Instalación de paquetes básicos.
 - Creación del proyecto **SmartWallet** con estructura base de solución y proyectos.
 
@@ -19,6 +24,7 @@ Cada entrada debe incluir:
 ---
 
 ## 2025-08-31
+# config/project-structure-and-config-environment
 - Regeneración de `SmartWalletBackend.sln` con rutas físicas correctas.
 - Inclusión de archivos raíz como Solution Items: `.env`, `.gitignore`, `README.md`.
 - Incorporación de todos los archivos de `/docs/` como Solution Items bajo la carpeta lógica `docs`.
@@ -32,3 +38,20 @@ Cada entrada debe incluir:
 
   - [Convenciones de documentación y Solution Items](conventions.md)  
   - [Configuración de entorno y variables](environment.md)  
+
+---
+
+## 2025-09-08
+# feature/domain-base-models
+Implementar la capa de dominio de SmartWallet con validaciones básicas usando DataAnnotations, sin introducir dependencias de infraestructura.
+- Creacion `Domain/Entities/User.cs`  
+   - Añadido `[Key]`, `[Required]`, `[StringLength]` y `[EmailAddress]` a propiedades  
+   - Relación 1:1 con `Wallet?`  
+- Creacion `Domain/Entities/Wallet.cs`  
+   - Validaciones para `Name`, `CurrencyCode`, `Alias`, `Balance`, `CreatedAt`  
+   - Usar `[Column(TypeName = "decimal(18,2)")]` para `Balance`  
+- Creacion `Domain/Entities/Transaction.cs`  
+   - Validar `Amount` con `[Range(0.01, double.MaxValue)]` y precisión decimal.
+
+---
+
