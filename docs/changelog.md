@@ -46,7 +46,7 @@ Cada entrada debe incluir:
 Implementar la capa de dominio de SmartWallet con validaciones básicas usando DataAnnotations, sin introducir dependencias de infraestructura.
 - Creacion `Domain/Entities/User.cs`  
    - Añadido `[Key]`, `[Required]`, `[StringLength]` y `[EmailAddress]` a propiedades  
-   - Relación 1:1 con `Wallet?`  
+   - Relación 1:1 con `Wallet`  
 - Creacion `Domain/Entities/Wallet.cs`  
    - Validaciones para `Name`, `CurrencyCode`, `Alias`, `Balance`, `CreatedAt`  
    - Usar `[Column(TypeName = "decimal(18,2)")]` para `Balance`  
@@ -65,4 +65,27 @@ Implementar la capa de dominio de SmartWallet con validaciones básicas usando Da
 
 ---
 
-
+## 2025-09-23
+### feature/domain-transaction-ledger-and-status
+Implementación de TransactionLedger, enums de TransactionType, TransactionStatus y CurrencyCode, junto con métodos de dominio para control de estados.
+- Creación de Domain/Entities/TransactionLedger.cs
+	- Registro auditable de operaciones con Timestamp, Type, Amount, CurrencyCode, SourceWalletId, DestinationWalletId, SourceTransactionId, DestinationTransactionId, Status y Metadata.
+	- Métodos de fábrica:
+		- CreateDeposit
+		- CreateWithdrawal
+		- CreateTransfer
+	- Métodos de dominio con validaciones de transición:
+		- MarkAsPending()
+		- MarkAsCompleted()
+		- MarkAsFailed()
+		- MarkAsCanceled()
+- Actualización de `TransactionType` en `SmartWallet.Domain.Enums`:
+	- Deposit = 0
+	- Withdrawal = 1
+	- Transfer = 2
+- Actualización de `TransactionStatus` en `SmartWallet.Domain.Enums`:
+	- Pending = 0
+	- Completed = 1
+	- Failed = 2
+	- Canceled = 3
+- [Ciclo de vida de las transacciones](/docs/06-transaction-lifecycle.md).
