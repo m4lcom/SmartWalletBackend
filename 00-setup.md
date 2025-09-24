@@ -1,12 +1,12 @@
 # Setup inicial — SmartWallet
 
-Pasos para configurar el entorno de desarrollo y levantar el backend.
+Este documento describe la configuración base del proyecto SmartWallet, para que todos podamos  replicarla desde cero.
 
 ---
 
 ## 1. Creación de la solución y proyectos
 ```bash
-dotnet new sln -n SmartWalletBackend
+dotnet new sln -n SmartWallet
 dotnet new webapi -n SmartWallet.API
 dotnet new classlib -n SmartWallet.Application
 dotnet new classlib -n SmartWallet.Domain
@@ -38,9 +38,3 @@ dotnet add SmartWallet.Infrastructure package Microsoft.EntityFrameworkCore
 dotnet add SmartWallet.API package Swashbuckle.AspNetCore
 dotnet add SmartWallet.API package Microsoft.EntityFrameworkCore.Design
 ```
-
----
-
-## 4. Notas importantes
-- Requiere .NET 8 o superior.
-- Verificar ruta de la base de datos SQLite.
