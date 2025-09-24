@@ -2,8 +2,8 @@
 
 ## Capas
 - `API` → Presentación y controladores.
-- `Application` → Casos de uso y lógica de negocio.
 - `Infrastructure` → Persistencia y acceso a datos.
+- `Application` → Casos de uso y lógica de negocio.
 - `Domain` → Entidades y reglas de dominio.
 
 ---

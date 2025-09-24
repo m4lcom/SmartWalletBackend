@@ -24,14 +24,16 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{02EA681E-C
 	ProjectSection(SolutionItems) = preProject
 		docs\00-setup.md = docs\00-setup.md
 		docs\01-architecture.md = docs\01-architecture.md
-		docs\02-authentication.md = docs\02-authentication.md
+		02-domain-base-model.md = 02-domain-base-model.md
 		docs\03-database.md = docs\03-database.md
 		docs\04-api-endpoints.md = docs\04-api-endpoints.md
+		docs\05-authentication.md = docs\05-authentication.md
+		docs\changelog.md = docs\changelog.md
+		06-transaction-lifecycle.md = 06-transaction-lifecycle.md
 		docs\conventions.md = docs\conventions.md
 		docs\environment.md = docs\environment.md
 		docs\new-feature.md = docs\new-feature.md
 		docs\references.md = docs\references.md
-		docs\changelog.md = docs\changelog.md
 	EndProjectSection
 EndProject
 Global

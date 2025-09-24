@@ -1,17 +1,17 @@
-﻿# Environment Configuration
+﻿# Configuracion de entorno
 
-This document describes the environment variables and configuration files required to run **SmartWallet** locally or in different environments.
+Este documento describe las variables de entorno y los archivos de configuración necesarios para ejecutar SmartWallet de forma local o en diferentes entornos.
 
 ---
 
-## 1. Environment Variables (`.env`)
+## 1. Variables de Entorno (`.env`)
 
 | Variable       | Description                                      | Example Value           |
 |----------------|--------------------------------------------------|-------------------------|
 | `JWT_SECRET`   | Secret key used to sign JWT tokens               | `super-secret-key`      |
 | `DB_PATH`      | Path to the SQLite database file                 | `smartwallet.db`        |
 
-> **Do not commit** your `.env` file to the repository. It must be listed in `.gitignore`.
+> **No debes commitear tu archivo `.env` al repositorio. Debe estar listado en `.gitignore`.
 
 ---
 
@@ -20,13 +20,12 @@ This document describes the environment variables and configuration files requir
 JWT_SECRET=your-secret-key-here 
 DB_PATH=smartwallet.db
 ```
-Developers should copy this file to `.env` and replace the placeholder values.
+Los desarrolladores deben copiar este archivo a .`env` y reemplazar los valores de ejemplo por los reales.
 
 ---
 
-## 3. `appsettings.json`
-
-Located in `src/SmartWalletAPI/` and contains non-sensitive configuration:
+## `appsettings.json`
+Ubicado en `src/SmartWalletAPI/` y contiene configuración no sensible:
 
 ```json
 {
@@ -82,7 +81,7 @@ Located in `src/SmartWalletAPI/` and contains non-sensitive configuration:
 
 ---
 
-## 4. Loading Environment Variables in `Program.cs`
+## 4. Carga de Variables de Entorno en `Program.cs`
 ```
 using DotNetEnv;
 
@@ -101,17 +100,19 @@ builder.Configuration["ConnectionStrings:DefaultConnection"] = $"Data Source={db
 
 ---
 
-## 5. Environment-specific Files
-- `appsettings.Development.json` → Local development overrides
-- `appsettings.Staging.json` → Staging environment overrides
-- `appsettings.Production.json` → Production environment overrides
+## 5. Archivos Específicos por Entorno
+- `appsettings.Development.json` → Configuración para desarrollo local
+- `appsettings.Staging.json` → Configuración para entorno de pruebas
+- `appsettings.Production.json` → Configuración para producción
 
 ---
 
-## 6. Security Notes
-- Never commit .env or production appsettings with real secrets.
-- Rotate JWT_SECRET periodically.
-- Use different secrets per environment.
+## Notas de Seguridad
+Nunca commitear `.env` ni `appsettings` de producción con secretos reales.
+
+Rotar periódicamente la clave `JWT_SECRET`.
+
+Usar claves diferentes para cada entorno.
 
 ---
 
