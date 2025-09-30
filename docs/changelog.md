@@ -18,8 +18,8 @@ Cada entrada debe incluir:
 - Instalación de paquetes básicos.
 - Creación del proyecto **SmartWallet** con estructura base de solución y proyectos.
 
-  - [Documentación de setup](00-setup.md)  
-  - [Documentación de arquitectura](01-architecture.md)
+- [Documentación de setup](00-setup.md)  
+- [Documentación de arquitectura](01-architecture.md)
 
 ---
 
@@ -36,8 +36,8 @@ Cada entrada debe incluir:
 - Refactor de `appsettings.json` para usar variables de entorno y configuración modular.
 - Limpieza y alineación de configuración entre `.env` y `appsettings.json` para mayor portabilidad y reproducibilidad.
 
-  - [Convenciones de documentación y Solution Items](conventions.md)  
-  - [Configuración de entorno y variables](environment.md)  
+- [Convenciones de documentación y Solution Items](conventions.md)  
+- [Configuración de entorno y variables](environment.md)  
 
 ---
 
@@ -88,4 +88,18 @@ Implementación de TransactionLedger, enums de TransactionType, TransactionStatus
 	- Completed = 1
 	- Failed = 2
 	- Canceled = 3
-- [Ciclo de vida de las transacciones](/docs/06-transaction-lifecycle.md).
+
+- [Ciclo de vida de las transacciones](/docs/06-transaction-lifecycle.md).
+
+---
+
+## 2025-09-30
+### feature/dbcontext-setup
+- Creación de `SmartWalletDbContext` en `Infrastructure.Persistence.Context`.
+- Constructor con `DbContextOptions`.
+- Método `OnModelCreating` presente, preparado para configuración de relaciones.
+- Inclusión de `DbSet` comentados para que el equipo agregue sus entidades.
+- Registro del contexto en `Program.cs` usando `UseSqlite` y cadena de conexión desde `.env`.
+- Validación de variables críticas (`JWT_SECRET`, `DB_PATH`) antes de iniciar la aplicación.
+
+- [Configuracion de db context ](03-dbcontext-setup.md)
