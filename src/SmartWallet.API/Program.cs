@@ -1,6 +1,9 @@
 using DotNetEnv;
 using Microsoft.EntityFrameworkCore;
 using System;
+using SmartWallet.Application.Interfaces;
+using SmartWallet.Application.Services;
+using SmartWallet.Infrastructure.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,6 +29,9 @@ builder.Configuration["ConnectionStrings:DefaultConnection"] = $"Data Source={db
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddScoped<IWalletRepository, WalletRepository>();
+builder.Services.AddScoped<WalletService>();
 
 // builder.Services.AddDbContext<AppDbContext>(options =>
 //     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));

@@ -49,7 +49,7 @@ public class Wallet
 
     public void Debit(decimal amount) 
     {
-        if (amount > 0) throw new InvalidOperationException("El monto debe ser mayor a cero.");
+        if (amount <= 0) throw new InvalidOperationException("El monto debe ser mayor a cero.");
         if (Balance < amount) throw new InvalidOperationException("Fondos insuficientes");
         Balance -= amount;
     }
