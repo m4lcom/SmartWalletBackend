@@ -1,11 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
+    <ProjectReference Include="..\..\SmartWallet.Contracts\SmartWallet.Contracts.csproj" />
     <ProjectReference Include="..\SmartWallet.Domain\SmartWallet.Domain.csproj" />
   </ItemGroup>
 
   <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
