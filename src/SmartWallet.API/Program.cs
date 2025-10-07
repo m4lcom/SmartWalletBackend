@@ -33,8 +33,11 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContext<SmartWalletDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+
 builder.Services.AddScoped<IWalletRepository, WalletRepository>();
 builder.Services.AddScoped<WalletService>();
+builder.Services.AddScoped<IWalletService, WalletService>();
 
 
 var app = builder.Build();

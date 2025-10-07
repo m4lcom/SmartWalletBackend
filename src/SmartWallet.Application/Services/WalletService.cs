@@ -4,7 +4,7 @@ using SmartWallet.Domain.Enums;
 
 namespace SmartWallet.Application.Services
 {
-    public class WalletService
+    public class WalletService : IWalletService
     {
         private readonly IWalletRepository _repository;
 

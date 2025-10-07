@@ -1,22 +1,27 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SmartWallet.Domain.Entities;
 
-
 namespace SmartWallet.Infrastructure.Persistence.Context
 {
     public class SmartWalletDbContext : DbContext
     {
-        // agregar los DbSet para tus entidades
-
         public SmartWalletDbContext(DbContextOptions<SmartWalletDbContext> options) : base(options)
         {
         }
+
+        
+        public DbSet<Wallet> Wallets { get; set; }
+        public DbSet<User> Users { get; set; }
+        public DbSet<Transaction> Transactions { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
-            // agregar relaciones entre entidades si es necesario
+            modelBuilder.Entity<Wallet>()
+                .HasOne(w => w.User)
+                .WithOne(u => u.Wallet) 
+                .HasForeignKey<Wallet>(w => w.UserID);
         }
     }
 }

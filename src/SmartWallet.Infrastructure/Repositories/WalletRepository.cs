@@ -1,29 +1,45 @@
 ﻿using SmartWallet.Application.Interfaces;
 using SmartWallet.Domain.Entities;
+using SmartWallet.Infrastructure.Persistence.Context;
+using Microsoft.EntityFrameworkCore;
 
 namespace SmartWallet.Infrastructure.Repositories
 {
     public class WalletRepository : IWalletRepository
     {
-        private readonly List<Wallet> _wallets = new();
+        private readonly SmartWalletDbContext _context;
+
+        public WalletRepository(SmartWalletDbContext context)
+        {
+            _context = context;
+        }
 
         public Wallet? GetById(Guid id) =>
-            _wallets.FirstOrDefault(w => w.WalletID == id);
+            _context.Wallets.FirstOrDefault(w => w.WalletID == id);
 
-        public IEnumerable<Wallet> GetAll() => _wallets;
+        public IEnumerable<Wallet> GetAll() =>
+            _context.Wallets.ToList();
 
-        public void Add(Wallet wallet) => _wallets.Add(wallet);
+        public void Add(Wallet wallet)
+        {
+            _context.Wallets.Add(wallet);
+            _context.SaveChanges();
+        }
 
         public void Update(Wallet wallet)
         {
-            var index = _wallets.FindIndex(w => w.WalletID == wallet.WalletID);
-            if (index >= 0) _wallets[index] = wallet;
+            _context.Wallets.Update(wallet);
+            _context.SaveChanges();
         }
 
         public void Delete(Guid id)
         {
-            var wallet = _wallets.FirstOrDefault(w => w.WalletID == id);
-            if (wallet != null) _wallets.Remove(wallet);
+            var wallet = _context.Wallets.FirstOrDefault(w => w.WalletID == id);
+            if (wallet != null)
+            {
+                _context.Wallets.Remove(wallet);
+                _context.SaveChanges();
+            }
         }
     }
 }
