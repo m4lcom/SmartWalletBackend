@@ -13,18 +13,22 @@ Las entidades ya estaban definidas previamente en la capa Domain.
 4. Se implementaron los repositorios `TransactionRepository` y `TransactionLedgerRepository`.
 5. Se registraron ambos repositorios en el contenedor de dependencias.
 6. Se definieron los endpoints en `TransactionsController`.
-7. Se testearon los endpoints vía Postman con valores válidos (`CurrencyCode = 32`).
-8. Se resolvieron errores 405 y 400 relacionados con registro de servicios y validación de enums.
-9. Se documentó la verticalidad completa para onboarding y mantenimiento.
+7. Se agregaron endpoints de lectura para `Transaction` y `TransactionLedger`.
+8. Se testearon los endpoints vía Postman con valores válidos (`CurrencyCode = 32`).
+9. Se resolvieron errores 405 y 400 relacionados con registro de servicios y validación de enums.
+10. Se documentó la verticalidad completa para onboarding y mantenimiento.
 
 ---
 
 ## Endpoints
-| Método | Ruta                             | Descripción                        | Autenticación |
-|--------|----------------------------------|------------------------------------|---------------|
-| POST   | /api/transactions/deposit        | Realiza un depósito en una wallet  | ✅ |
-| POST   | /api/transactions/withdraw       | Realiza una extracción             | ✅ |
-| POST   | /api/transactions/transfer       | Transfiere entre dos wallets       | ✅ |
+| Método | Ruta                                 | Descripción                              | Autenticación |
+|--------|--------------------------------------|------------------------------------------|---------------|
+| POST   | /api/transactions/deposit            | Realiza un depósito en una wallet        | ✅ |
+| POST   | /api/transactions/withdraw           | Realiza una extracción                   | ✅ |
+| POST   | /api/transactions/transfer           | Transfiere entre dos wallets             | ✅ |
+| GET    | /api/transactions/{id}               | Obtiene una transacción por ID           | ✅ |
+| GET    | /api/transactions-ledger/{id}        | Obtiene un ledger por ID                 | ✅ |
+| GET    | /api/transactions-ledger/by-transaction/{transactionId} | Ledger vinculado a una transacción | ✅ |
 
 ---
 
