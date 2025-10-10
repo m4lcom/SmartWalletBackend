@@ -1,7 +1,4 @@
-# API y Endpoints
-
-Lista de endpoints por módulo con descripción y ejemplos.
-
+﻿# API y Endpoints
 
 # Endpoints – Transaction + TransactionLedger
 
