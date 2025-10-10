@@ -18,10 +18,8 @@ namespace SmartWallet.Domain.Entities
         public UserRole Role { get; private set; }
         public DateTime CreatedAt { get; private set; }
         public DateTime? UpdatedAt { get; private set; }
-
         public bool Active { get; private set;  }
 
-        public Wallet? Wallet { get; private set; }
         protected User() { }
 
         public User(string name, string email, string passwordHash, UserRole role, bool active)

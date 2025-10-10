@@ -65,7 +65,7 @@ namespace SmartWallet.Application.Services
             var existingUser = _userRepository.GetUserByEmail(request.Email);
             if (existingUser != null) 
                 return false;
-            var passwordHash = request.Password; //Aca se va a hashear la password
+            var passwordHash = request.Password;
             var newUser = new Domain.Entities.User(
                 request.Name,
                 request.Email,
@@ -89,7 +89,7 @@ namespace SmartWallet.Application.Services
            
             if (!string.IsNullOrWhiteSpace(request.Password))
             {
-                var passwordHash = request.Password; //Aca se va a hashear la password
+                var passwordHash = request.Password;
                 user.ChangePassword(passwordHash);
             }
             
