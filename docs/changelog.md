@@ -88,4 +88,13 @@ Implementación de TransactionLedger, enums de TransactionType, TransactionStatus
 	- Completed = 1
 	- Failed = 2
 	- Canceled = 3
-- [Ciclo de vida de las transacciones](/docs/06-transaction-lifecycle.md).
+
+- [Ciclo de vida de las transacciones](/docs/06-transaction-lifecycle.md).
+
+---
+
+## 2025-10-10
+### feature/user-management
+- Documentación completa de la arquitectura de gestión de usuarios en `08-user-management.md`.
+- Implementación de `UserRepository` con método `GetUserByEmail`.
+- Integración de repositorio, servicio y controlador para operaciones CRUD de usuario.

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SmartWallet.Application.Services;
+using SmartWallet.Contracts.Requests;
 
 namespace SmartWallet.API.Controllers
 {
@@ -42,7 +43,7 @@ namespace SmartWallet.API.Controllers
         }
 
         [HttpPost]
-        public IActionResult CreateUser([FromBody] SmartWallet.Contracts.Requests.UserCreateRequest request)
+        public IActionResult CreateUser([FromBody]  UserCreateRequest request)
         {
             var result = _userServices.CreateUser(request);
             if (!result)
@@ -52,9 +53,20 @@ namespace SmartWallet.API.Controllers
             return Ok();
         }
         [HttpPut]
-        public IActionResult UpdateUser([FromQuery] string email, [FromBody] SmartWallet.Contracts.Requests.UserUpdateDataRequest request)
+        public IActionResult UpdateUser([FromQuery] Guid id, [FromBody] UserUpdateDataRequest request)
         {
-            var result = _userServices.UpdateUser(email, request);
+            var result = _userServices.UpdateUser(id, request);
+            if (!result)
+            {
+                return BadRequest();
+            }
+            return Ok();
+        }
+
+        [HttpPut("/ChangeActiveStatus/")]
+        public IActionResult ChangeUserActiveStatus([FromQuery] Guid id)
+        {
+            var result = _userServices.ChangeUserActiveStatus(id);
             if (!result)
             {
                 return BadRequest();
@@ -63,9 +75,9 @@ namespace SmartWallet.API.Controllers
         }
 
         [HttpDelete]
-        public IActionResult DeleteUser([FromQuery] string email)
+        public IActionResult DeleteUser([FromQuery] Guid id)
         {
-            var result = _userServices.DeleteUser(email);
+            var result = _userServices.DeleteUser(id);
             if (!result)
             {
                 return BadRequest();

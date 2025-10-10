@@ -24,9 +24,12 @@ Permite desacoplar la lógica de persistencia de la lógica de negocio.
 - `void Update(User user)`
 - `void Delete(User user)`
 
+**Implementación destacada:**
+- El método `GetUserByEmail` permite buscar eficientemente un usuario por su correo electrónico usando LINQ sobre el contexto de EF Core.
+
 **Ubicación:**  
 `src/SmartWallet.Application/Abstraction/IUserRepository.cs`  
-`src/SmartWallet.Infrastructure/Persistence/UserRepository.cs`
+`src/SmartWallet.Infrastructure/Persistence/Repositories/UserRepository.cs`
 
 ---
 
@@ -73,7 +76,7 @@ Recibe y valida las solicitudes, delega la lógica al servicio y retorna respues
 | DELETE | /api/users/{email}  | Eliminar usuario             | ✅            |
 
 **Ubicación:**  
-`src/SmartWalletAPI/Controllers/UserController.cs`
+`src/SmartWallet.API/Controllers/UserController.cs`
 
 ---
 
@@ -84,4 +87,51 @@ Recibe y valida las solicitudes, delega la lógica al servicio y retorna respues
 3. El servicio ejecuta la lógica de negocio y utiliza el **repositorio** para acceder a los datos.
 4. El resultado se mapea a un DTO de respuesta y se retorna al controller.
 5. El controller responde al cliente con el resultado y el código HTTP adecuado.
+
+---
+
+## Ejemplo de uso del repositorio
+
+```csharp
+// Obtener un usuario por email
+public ActionResult<UserResponse> GetUserByEmail(string email)
+{
+    var user = _userServices.GetUserByEmail(email);
+    if (user == null) return NotFound();
+
+    return Ok(user);
+}
+
+// Crear un nuevo usuario
+[HttpPost]
+public IActionResult CreateUser([FromBody] UserCreateRequest request)
+{
+    if (!ModelState.IsValid) return BadRequest(ModelState);
+
+    _userServices.CreateUser(request);
+
+    return CreatedAtAction(nameof(GetUserById), new { id = request.Id }, request);
+}
+
+// Actualizar usuario existente
+[HttpPut("{email}")]
+public IActionResult UpdateUser(string email, [FromBody] UserUpdateDataRequest request)
+{
+    if (!ModelState.IsValid) return BadRequest(ModelState);
+
+    var updated = _userServices.UpdateUser(email, request);
+    if (!updated) return NotFound();
+
+    return NoContent();
+}
+
+// Eliminar usuario
+[HttpDelete("{email}")]
+public IActionResult DeleteUser(string email)
+{
+    var deleted = _userServices.DeleteUser(email);
+    if (!deleted) return NotFound();
+
+    return NoContent();
+}
 

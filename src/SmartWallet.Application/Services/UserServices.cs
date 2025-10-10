@@ -77,11 +77,11 @@ namespace SmartWallet.Application.Services
             return true;
         }
 
-        public bool UpdateUser(string email, UserUpdateDataRequest request)
+        public bool UpdateUser(Guid id, UserUpdateDataRequest request)
         {
-            var user = _userRepository.GetUserByEmail(email);
-            
-            if (user == null) 
+            var user = _userRepository.GetById(id);
+
+            if (user == null)
                 return false;
             
             if (!string.IsNullOrWhiteSpace(request.Name))
@@ -103,14 +103,26 @@ namespace SmartWallet.Application.Services
             return true;
         }
 
-        public bool DeleteUser(string email)
+        public bool ChangeUserActiveStatus(Guid id)
         {
-            var user = _userRepository.GetUserByEmail(email);
-            
+            var user = _userRepository.GetById(id);
+
+            if (user == null)
+                return false;
+            user.SetActive(!user.Active);
+            _userRepository.Update(user);
+            return true;
+        }
+
+        public bool DeleteUser(Guid id)
+        {
+            var user = _userRepository.GetById(id);
+
             if (user == null) 
                 return false;
-            
-            _userRepository.Delete(user);
+            user.SetActive(false);
+
+            _userRepository.Update(user);
             return true;
         }
 
