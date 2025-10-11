@@ -9,7 +9,7 @@ namespace SmartWallet.Domain.Entities;
 public class Wallet
 {
     [Key]
-    public Guid WalletID { get; private set; }
+    public Guid Id { get; private set; }
 
     public Guid UserID { get; private set; }
     public User User { get; private set; } = null!;
@@ -32,11 +32,17 @@ public class Wallet
     private readonly List<Transaction> _transactions = new();
     public IReadOnlyCollection<Transaction> Transactions => _transactions.AsReadOnly();
 
+    // Navegaciones inversas
+    public ICollection<TransactionLedger> SourceLedgers { get; private set; } = new List<TransactionLedger>();
+    public ICollection<TransactionLedger> DestinationLedgers { get; private set; } = new List<TransactionLedger>();
+    public ICollection<Transaction> ReceivedTransfers { get; private set; } = new List<Transaction>();
+
+    // --- constructores ---
     protected Wallet() { }
 
     public Wallet(Guid userId, string name, CurrencyCode currencyCode, string alias, decimal initialBalance = 0)
     {
-        WalletID = Guid.NewGuid();
+        Id = Guid.NewGuid();
         UserID = userId;
         Name = name;
         CurrencyCode = currencyCode;
@@ -49,7 +55,7 @@ public class Wallet
 
     public void Debit(decimal amount) 
     {
-        if (amount > 0) throw new InvalidOperationException("El monto debe ser mayor a cero.");
+        if (amount <= 0) throw new InvalidOperationException("El monto debe ser mayor a cero.");
         if (Balance < amount) throw new InvalidOperationException("Fondos insuficientes");
         Balance -= amount;
     }
@@ -60,16 +66,17 @@ public class Wallet
         Balance += amount;
     }
 
-    public Transaction CreatedTransaction(
-        TransactionType type,
-        decimal amount,
-        Guid? destinationWalletId = null,
-        TransactionStatus status = TransactionStatus.Pending)
+    public Transaction CreateTransaction(
+    TransactionType type,
+    decimal amount,
+    Guid? destinationWalletId = null,
+    TransactionStatus status = TransactionStatus.Pending)
     {
-        var transaction = new Transaction(WalletID, type, amount, destinationWalletId, status);
+        var transaction = new Transaction(Id, type, amount, CurrencyCode, destinationWalletId, status);
         _transactions.Add(transaction);
         return transaction;
     }
+
 
 
 }
