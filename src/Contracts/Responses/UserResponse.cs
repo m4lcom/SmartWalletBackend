@@ -1,6 +1,6 @@
 ﻿
 
-namespace SmartWallet.Contracts.Responses
+namespace Contracts.Responses
 {
     public class UserResponse
     {

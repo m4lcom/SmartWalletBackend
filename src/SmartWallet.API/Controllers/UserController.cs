@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SmartWallet.Application.Services;
-using SmartWallet.Contracts.Requests;
+using Contracts.Requests;
 
 namespace SmartWallet.API.Controllers
 {
