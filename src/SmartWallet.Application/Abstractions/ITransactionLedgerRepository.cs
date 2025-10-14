@@ -4,14 +4,13 @@ namespace SmartWallet.Application.Abstractions
 {
     public interface ITransactionLedgerRepository
     {
+        Task AddAsync(TransactionLedger ledger);
+        Task AddRangeAsync(IEnumerable<TransactionLedger> ledgers);
         Task<TransactionLedger?> GetByIdAsync(Guid id);
         Task<List<TransactionLedger>> GetByWalletAsync(Guid walletId);
         Task<List<TransactionLedger>> GetByTransactionAsync(Guid transactionId);
         Task<List<TransactionLedger>> GetByDateRangeAsync(DateTime from, DateTime to);
-        Task AddAsync(TransactionLedger ledger);
-        Task AddRangeAsync(IEnumerable<TransactionLedger> ledgers);
-        Task UpdateAsync(TransactionLedger ledger);
-        Task<bool> ExistAsync(Guid id);
+        Task<bool> ExistsAsync(Guid ledgerId);
 
     }
 }

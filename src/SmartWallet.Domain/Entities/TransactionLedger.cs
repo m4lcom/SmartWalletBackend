@@ -4,15 +4,15 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SmartWallet.Domain.Entities
 {
-    /// Cada TransactionLedger refleja el impacto de una transacción en una wallet.
+    /// <summary>
+    /// cada TransactionLedger refleja el impacto de una transacción en una wallet.
+    /// es inmutable: nunca se modifica, siempre se corrige con nuevos asientos.
+    /// </summary>
     public class TransactionLedger
     {
         // --- identidad y metadatos ---
         [Key]
         public Guid Id { get; private set; }
-
-        [Required]
-        public DateTimeOffset Timestamp { get; private set; }
 
         [Required]
         public TransactionType Type { get; private set; }
@@ -25,21 +25,18 @@ namespace SmartWallet.Domain.Entities
         public CurrencyCode CurrencyCode { get; private set; }
 
         [Required]
-        public TransactionStatus Status { get; private set; }
-
+        public LedgerStatus Status { get; private set; }
+        
+        [Required]
+        public DateTimeOffset Timestamp { get; private set; }
         public string? Metadata { get; private set; }
 
         // --- relaciones con transacciones y wallets ---
-        public Guid? SourceTransactionId { get; private set; }
-        public Guid? SourceWalletId { get; private set; }
+        public Guid TransactionId { get; private set; }
+        public Guid WalletId { get; private set; }
 
-        [ForeignKey("SourceWalletId")]
-        public Wallet? SourceWallet { get; private set; }
-        public Guid? DestinationTransactionId { get; private set; }
-        public Guid? DestinationWalletId { get; private set; }
-
-        [ForeignKey("DestinationWalletId")]
-        public Wallet? DestinationWallet { get; private set; }
+        [ForeignKey(nameof(WalletId))]
+        public Wallet Wallet { get; private set; } = null!;
 
         // --- constructores ---
         private TransactionLedger() { }
@@ -48,15 +45,13 @@ namespace SmartWallet.Domain.Entities
             TransactionType type,
             decimal amount,
             CurrencyCode currencyCode,
-            TransactionStatus status,
-            Guid? sourceWalletId = null,
-            Guid? destinationWalletId = null,
-            Guid? sourceTransactionId = null,
-            Guid? destinationTransactionId = null,
+            LedgerStatus status,
+            Guid transactionId,
+            Guid walletId,
             string? metadata = null)
         {
-            if (amount <= 0)
-                throw new ArgumentException("El monto debe ser mayor a cero.", nameof(amount));
+            if (amount == 0)
+                throw new ArgumentException("El monto no puede ser cero.", nameof(amount));
 
             Id = Guid.NewGuid();
             Timestamp = DateTimeOffset.UtcNow;
@@ -64,10 +59,8 @@ namespace SmartWallet.Domain.Entities
             Amount = amount;
             CurrencyCode = currencyCode;
             Status = status;
-            SourceWalletId = sourceWalletId;
-            DestinationWalletId = destinationWalletId;
-            SourceTransactionId = sourceTransactionId;
-            DestinationTransactionId = destinationTransactionId;
+            TransactionId = transactionId;
+            WalletId = walletId;
             Metadata = metadata;
         }
 
@@ -82,12 +75,10 @@ namespace SmartWallet.Domain.Entities
                 TransactionType.Deposit,
                 amount,
                 currency,
-                TransactionStatus.Pending,
-                null,
-                walletId,
-                null,
+                LedgerStatus.Completed,
                 transactionId,
-                metadata);
+                walletId,
+                metadata ?? "Deposit");
 
         public static TransactionLedger CreateWithdrawal(
             Guid walletId,
@@ -97,33 +88,25 @@ namespace SmartWallet.Domain.Entities
             string? metadata = null)
             => new TransactionLedger(
                 TransactionType.Withdrawal,
-                amount,
+                - amount,
                 currency,
-                TransactionStatus.Pending,
+                LedgerStatus.Completed,
                 walletId,
-                null,
                 transactionId,
-                null,
-                metadata);
+                metadata ?? "Withdrawal");
 
-        public static TransactionLedger CreateTransfer(
+        public static List<TransactionLedger> CreateTransfer(
             Guid sourceWalletId,
             Guid destinationWalletId,
-            Guid? sourceTransactionId,
-            Guid? destinationTransactionId,
+            Guid transactionId,
             decimal amount,
             CurrencyCode currency,
             string? metadata = null)
-            => new TransactionLedger(
-                TransactionType.Transfer,
-                amount,
-                currency,
-                TransactionStatus.Pending,
-                sourceWalletId,
-                destinationWalletId,
-                sourceTransactionId,
-                destinationTransactionId,
-                metadata);
+            => new List<TransactionLedger>
+            {
+                new TransactionLedger(TransactionType.Transfer, -amount, currency, LedgerStatus.Completed, transactionId, sourceWalletId, metadata ?? "Transfer Debit"),
+                new TransactionLedger(TransactionType.Transfer, amount, currency, LedgerStatus.Completed, transactionId, destinationWalletId, metadata ?? "Transfer Credit")
+            };
 
         // --- conversion desde transaction ---
         public static List<TransactionLedger> FromTransaction(Transaction transaction, string? metadata = null)
@@ -131,74 +114,32 @@ namespace SmartWallet.Domain.Entities
             return transaction.Type switch
             {
                 TransactionType.Deposit => new List<TransactionLedger>
-        {
-            CreateDeposit(transaction.WalletId, transaction.Id, transaction.Amount, transaction.CurrencyCode, metadata)
-        },
+                {
+                    CreateDeposit(transaction.WalletId, transaction.Id, transaction.Amount, transaction.CurrencyCode, metadata)
+                },
 
                 TransactionType.Withdrawal => new List<TransactionLedger>
-        {
-            CreateWithdrawal(transaction.WalletId, transaction.Id, transaction.Amount, transaction.CurrencyCode, metadata)
-        },
+                {
+                    CreateWithdrawal(transaction.WalletId, transaction.Id, transaction.Amount, transaction.CurrencyCode, metadata)
+                },
 
-                TransactionType.Transfer => new List<TransactionLedger>
-        {
-            // asiento de débito (wallet origen)
-            CreateTransfer(
-                transaction.WalletId,
-                transaction.DestinationWalletId!.Value,
-                transaction.Id,
-                null,
-                transaction.Amount,
-                transaction.CurrencyCode,
-                metadata
-            ),
-
-            // asiento de crédito (wallet destino)
-            CreateTransfer(
-                transaction.DestinationWalletId!.Value,
-                transaction.WalletId,
-                null,
-                transaction.Id,
-                transaction.Amount,
-                transaction.CurrencyCode,
-                metadata
-            )
-        },
-
+                TransactionType.Transfer => CreateTransfer(transaction.WalletId, transaction.DestinationWalletId!.Value, transaction.Id, transaction.Amount, transaction.CurrencyCode, metadata),
                 _ => throw new InvalidOperationException("Tipo de transacción no soportado.")
             };
         }
 
-
-
-
-        // --- metodos de dominio para estados ---
-        public void MarkAsPending()
+        // --- metodos de correcion ---
+        public TransactionLedger CreateReversal(string? metadata = null)
         {
-            if (Status != TransactionStatus.Pending)
-                throw new InvalidOperationException("Solo se puede marcar como Pending al crear la transacción.");
-            Status = TransactionStatus.Pending;
+            return new TransactionLedger(this.Type, -this.Amount, this.CurrencyCode, LedgerStatus.Reversed, this.TransactionId, this.WalletId, metadata ?? $"Reversal of {this.Id}");
         }
 
-        public void MarkAsCompleted()
+        public TransactionLedger CreateAdjustment(decimal newAmount, string? metadata = null)
         {
-            if (Status != TransactionStatus.Pending)
-                throw new InvalidOperationException("Solo una transacción pendiente puede marcarse como Completed.");
-            Status = TransactionStatus.Completed;
-        }
-
-        public void MarkAsFailed()
-        {
-            if (Status == TransactionStatus.Completed)
-                throw new InvalidOperationException("No se puede marcar como Failed una transacción ya completada.");
-            Status = TransactionStatus.Failed;
-        }
-
-        public void MarkAsCanceled()
-        {
-            if (Status == TransactionStatus.Completed)
-                throw new InvalidOperationException("No se puede marcar como Canceled una transacción ya completada.");
-            Status = TransactionStatus.Canceled;
+            var difference = newAmount - this.Amount;
+            if (difference == 0)
+                throw new InvalidOperationException("No se puede crear un ajuste sin diferencia de monto");
+            return new TransactionLedger(this.Type, difference, this.CurrencyCode, LedgerStatus.Adjustment, this.TransactionId, this.WalletId, metadata ?? $"Adjustment of {this.Id}");
         }
     }
 }

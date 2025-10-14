@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SmartWallet.Application.Services;
 using SmartWallet.Contracts.Responses;
+using SmartWallet.Domain.Entities;
 
 
 namespace SmartWallet.API.Controllers
@@ -17,29 +18,13 @@ namespace SmartWallet.API.Controllers
         }
 
         // --- consultas --- 
-
         // --- obtiene un ledger por su identificador unico. ---
         [HttpGet("{id:guid}")]
         public async Task<IActionResult> GetById(Guid id)
         {
             var ledger = await _ledgerService.GetByIdAsync(id);
-            if (ledger == null) return NotFound();
-
-            var response = new TransactionLedgerResponse(
-                ledger.Id,
-                ledger.Timestamp,
-                ledger.Type.ToString(),
-                ledger.Amount,
-                ledger.CurrencyCode.ToString(),
-                ledger.Status.ToString(),
-                ledger.SourceWalletId,
-                ledger.DestinationWalletId,
-                ledger.SourceTransactionId,
-                ledger.DestinationTransactionId,
-                ledger.Metadata
-            );
-
-            return Ok(response);
+            if(ledger == null) return NotFound();
+            return Ok(MapToResponse(ledger));
         }
 
         // --- obtiene todos los ledger asociados a una wallet especifica.
@@ -47,22 +32,7 @@ namespace SmartWallet.API.Controllers
         public async Task<IActionResult> GetByWallet(Guid walletId)
         {
             var ledgers = await _ledgerService.GetByWalletAsync(walletId);
-
-            var responses = ledgers.Select(l => new TransactionLedgerResponse(
-                l.Id,
-                l.Timestamp,
-                l.Type.ToString(),
-                l.Amount,
-                l.CurrencyCode.ToString(),
-                l.Status.ToString(),
-                l.SourceWalletId,
-                l.DestinationWalletId,
-                l.SourceTransactionId,
-                l.DestinationTransactionId,
-                l.Metadata
-            ));
-
-            return Ok(responses);
+            return Ok(ledgers.Select(MapToResponse));
         }
 
         // --- obtiene todos los ledgers relacionados a una transaccion especifica. ---
@@ -70,22 +40,7 @@ namespace SmartWallet.API.Controllers
         public async Task<IActionResult> GetByTransaction(Guid transactionId)
         {
             var ledgers = await _ledgerService.GetByTransactionAsync(transactionId);
-
-            var responses = ledgers.Select(l => new TransactionLedgerResponse(
-                l.Id,
-                l.Timestamp,
-                l.Type.ToString(),
-                l.Amount,
-                l.CurrencyCode.ToString(),
-                l.Status.ToString(),
-                l.SourceWalletId,
-                l.DestinationWalletId,
-                l.SourceTransactionId,
-                l.DestinationTransactionId,
-                l.Metadata
-            ));
-
-            return Ok(responses);
+            return Ok(ledgers.Select(MapToResponse));
         }
 
         // --- obtiene todos los ledgers dentro de un rango de fechas. ---
@@ -93,94 +48,20 @@ namespace SmartWallet.API.Controllers
         public async Task<IActionResult> GetByDateRange([FromQuery] DateTime from, [FromQuery] DateTime to)
         {
             var ledgers = await _ledgerService.GetByDateRangeAsync(from, to);
-
-            var responses = ledgers.Select(l => new TransactionLedgerResponse(
-                l.Id,
-                l.Timestamp,
-                l.Type.ToString(),
-                l.Amount,
-                l.CurrencyCode.ToString(),
-                l.Status.ToString(),
-                l.SourceWalletId,
-                l.DestinationWalletId,
-                l.SourceTransactionId,
-                l.DestinationTransactionId,
-                l.Metadata
-            ));
-
-            return Ok(responses);
+            return Ok(ledgers.Select(MapToResponse));
         }
 
-        // --- cambios de estado ---
-
-        // --- marca un ledger como completado. ---
-        [HttpPatch("{id:guid}/complete")]
-        public async Task<IActionResult> MarkAsCompleted(Guid id)
-        {
-            var ledger = await _ledgerService.MarkAsCompletedAsync(id);
-
-            var response = new TransactionLedgerResponse(
-                ledger.Id,
-                ledger.Timestamp,
-                ledger.Type.ToString(),
-                ledger.Amount,
-                ledger.CurrencyCode.ToString(),
-                ledger.Status.ToString(),
-                ledger.SourceWalletId,
-                ledger.DestinationWalletId,
-                ledger.SourceTransactionId,
-                ledger.DestinationTransactionId,
-                ledger.Metadata
-            );
-
-            return Ok(response);
-        }
-
-        // --- marca un ledger como fallido. ---
-        [HttpPatch("{id:guid}/fail")]
-        public async Task<IActionResult> MarkAsFailed(Guid id)
-        {
-            var ledger = await _ledgerService.MarkAsFailedAsync(id);
-
-            var response = new TransactionLedgerResponse(
-                ledger.Id,
-                ledger.Timestamp,
-                ledger.Type.ToString(),
-                ledger.Amount,
-                ledger.CurrencyCode.ToString(),
-                ledger.Status.ToString(),
-                ledger.SourceWalletId,
-                ledger.DestinationWalletId,
-                ledger.SourceTransactionId,
-                ledger.DestinationTransactionId,
-                ledger.Metadata
-            );
-
-            return Ok(response);
-        }
-
-        // --- marca un ledger como cancelado. ---
-        [HttpPatch("{id:guid}/cancel")]
-        public async Task<IActionResult> MarkAsCanceled(Guid id)
-        {
-            var ledger = await _ledgerService.MarkAsCanceledAsync(id);
-
-            var response = new TransactionLedgerResponse(
-                ledger.Id,
-                ledger.Timestamp,
-                ledger.Type.ToString(),
-                ledger.Amount,
-                ledger.CurrencyCode.ToString(),
-                ledger.Status.ToString(),
-                ledger.SourceWalletId,
-                ledger.DestinationWalletId,
-                ledger.SourceTransactionId,
-                ledger.DestinationTransactionId,
-                ledger.Metadata
-            );
-
-            return Ok(response);
-        }
+        // --- mapper privado ---
+        private static TransactionLedgerResponse MapToResponse(TransactionLedger ledger) => new TransactionLedgerResponse(
+            ledger.Id,
+            ledger.Timestamp,
+            ledger.Type.ToString(),
+            ledger.Amount,
+            ledger.CurrencyCode.ToString(),
+            ledger.Status.ToString(),
+            ledger.WalletId,
+            ledger.TransactionId,
+            ledger.Metadata);
 
     }
 }

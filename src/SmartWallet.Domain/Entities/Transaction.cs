@@ -4,15 +4,36 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SmartWallet.Domain.Entities
 {
+    /// <summary>
+    ///    representa una transaccion solicitada por un usuario (deposito, retiro, transferencia).
+    ///    es mutable en su estado, porque refleja el ciclo de vida de la transaccion.
+    /// </summary>
     public class Transaction
     {
+        // --- identidad y metadatos ---
         [Key]
         public Guid Id { get; private set; }
 
+        [Required]
+        public TransactionType Type { get; private set; }
+        
+        [Range(0.01, double.MaxValue, ErrorMessage = "El monto debe ser mayor a cero.")]
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal Amount { get; private set; }
+        
+        [Required]
+        public CurrencyCode CurrencyCode { get; private set; }
+
+        [Required]
+        public TransactionStatus Status { get; private set; }
+
+        [Required]
+        public DateTimeOffset CreatedAt { get; private set; }
+        
         // --- relaciones con wallet origen ---
         public Guid WalletId { get; private set; }
 
-        [ForeignKey("WalletId")]
+        [ForeignKey(nameof(WalletId))]
         public Wallet Wallet { get; private set; } = null!;
 
         // --- relaciones con wallet destino para transferencias ---
@@ -21,65 +42,47 @@ namespace SmartWallet.Domain.Entities
         [ForeignKey("DestinationWalletId")]
         public Wallet? DestinationWallet { get; private set; }
 
-        [Range(0.01, double.MaxValue, ErrorMessage = "El monto debe ser mayor a cero.")]
-        [Column(TypeName = "decimal(18,2)")]
-        public decimal Amount { get; private set; }
-
-        [Required]
-        public CurrencyCode CurrencyCode { get; private set; }
-
-        [Required]
-        public TransactionType Type { get; private set; }
-
-        [Required]
-        public TransactionStatus Status { get; private set; }
-        public DateTime CreatedAt { get; private set; }
-
         // --- constructores ---
         protected Transaction() { }
 
         public Transaction(
-            Guid walletId,
-            TransactionType type,
-            decimal amount,
-            CurrencyCode currencyCode,
-            Guid? destinationWalletId = null,
-            TransactionStatus status = TransactionStatus.Pending)
+            Guid walletId, Guid? destinationWalletId, decimal amount, CurrencyCode currency, TransactionType type)
         {
-            if (type == TransactionType.Transfer && destinationWalletId == null)
-                throw new ArgumentException("las transacciones de tipo transferencia requieren DestinationWalletId.");
+                if (type == TransactionType.Transfer && destinationWalletId == null)
+                    throw new ArgumentException("Las transacciones de tipo Transfer requieren DestinationWalletId.");
 
-            if (type != TransactionType.Transfer && destinationWalletId != null)
-                throw new ArgumentException("solo las transacciones de tipo transferencia deben tener DestinationWalletId.");
+                if (type != TransactionType.Transfer && destinationWalletId != null)
+                    throw new ArgumentException("Solo las transacciones de tipo Transfer deben tener DestinationWalletId.");
 
-            if( amount <= 0)
-                throw new ArgumentException("el monto debe ser mayor a cero.", nameof(amount));
+                if( amount <= 0)
+                    throw new ArgumentException("El monto debe ser mayor a cero.", nameof(amount));
 
-            Id = Guid.NewGuid();
-            WalletId = walletId;
-            Type = type;
-            Amount = amount;
-            CurrencyCode = currencyCode;
-            DestinationWalletId = destinationWalletId;
-            Status = status;
-            CreatedAt = DateTime.UtcNow;
+                Id = Guid.NewGuid();
+                WalletId = walletId;
+                DestinationWalletId = destinationWalletId;
+                Amount = amount;
+                CurrencyCode = currency;
+                Type = type;
+                Status = TransactionStatus.Pending;
+                CreatedAt = DateTimeOffset.UtcNow;
         }
 
+        // --- factory methods ---
+        public static Transaction CreateDeposit(Guid walletId, decimal amount, CurrencyCode currency)
+            => new Transaction(walletId, null, amount, currency, TransactionType.Deposit);
+
+        public static Transaction CreateWithdrawal(Guid walletId, decimal amount, CurrencyCode currency)
+            => new Transaction(walletId, null, amount, currency, TransactionType.Withdrawal);
+
+        public static Transaction CreateTransfer(Guid sourceWalletId, Guid destinationWalletId, decimal amount, CurrencyCode currency)
+            => new Transaction(sourceWalletId, destinationWalletId, amount, currency,  TransactionType.Transfer);
+        
         // --- metodos de dominio ---
-        public void MarkAsPending()
-        {
-            if (Status != TransactionStatus.Pending)
-            {
-                throw new InvalidOperationException("solo se puede marcar como Pending al crear la transaccion.");
-            }
-            Status = TransactionStatus.Pending;
-        }
-
         public void MarkAsCompleted()
         {
             if (Status != TransactionStatus.Pending)
             {
-                throw new InvalidOperationException("solo una transaccion pendiente puede marcarse como Completed.");
+                throw new InvalidOperationException("Solo una transaccion pendiente puede marcarse como Completed.");
             }
             Status = TransactionStatus.Completed;
         }
@@ -88,12 +91,12 @@ namespace SmartWallet.Domain.Entities
         {
             if (Status == TransactionStatus.Completed)
             {
-                throw new InvalidOperationException("no se puede marcar como Failed una transaccion ya completada.");
+                throw new InvalidOperationException("No se puede marcar como Failed una transaccion ya completada.");
             }
             Status = TransactionStatus.Failed;
         }
 
-        public void MarkAsCancelled()
+        public void MarkAsCanceled()
         {
             if (Status == TransactionStatus.Completed)
             {
@@ -101,16 +104,5 @@ namespace SmartWallet.Domain.Entities
             }
             Status = TransactionStatus.Canceled;
         }
-
-        // --- factory methods ---
-        public static Transaction CreateDeposit(Guid walletId, decimal amount, CurrencyCode currency)
-    => new Transaction(walletId, TransactionType.Deposit, amount, currency);
-
-        public static Transaction CreateWithdrawal(Guid walletId, decimal amount, CurrencyCode currency)
-            => new Transaction(walletId, TransactionType.Withdrawal, amount, currency);
-
-        public static Transaction CreateTransfer(Guid sourceWalletId, Guid destinationWalletId, decimal amount, CurrencyCode currency)
-            => new Transaction(sourceWalletId, TransactionType.Transfer, amount, currency, destinationWalletId);
-
     }
 }
