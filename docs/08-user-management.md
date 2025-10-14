@@ -47,8 +47,14 @@ Orquesta la interacción entre los controladores y los repositorios.
 - `UserResponse? GetUserById(Guid id)`
 - `UserResponse? GetUserByEmail(string email)`
 - `bool CreateUser(UserCreateRequest request)`
-- `bool UpdateUser(string email, UserUpdateDataRequest request)`
-- `bool DeleteUser(string email)`
+- `bool UpdateUser(Guid id, UserUpdateDataRequest request)`
+- `bool ChangeUserActiveStatus(Guid id)`
+- `bool DeleteUser(Guid id)`
+
+**Cambios recientes:**
+- Ahora las operaciones de actualización, cambio de estado activo y eliminación usan el `Guid id` del usuario en vez del email.
+- Se agregó el método `ChangeUserActiveStatus(Guid id)` para alternar el estado activo/inactivo del usuario.
+- La eliminación lógica (`DeleteUser`) ahora solo desactiva el usuario (no lo borra físicamente).
 
 **Ubicación:**  
 `src/SmartWallet.Application/Services/IUserServices.cs`  
@@ -65,15 +71,20 @@ Recibe y valida las solicitudes, delega la lógica al servicio y retorna respues
 - Validar datos de entrada (model binding, DataAnnotations).
 - Retornar respuestas HTTP estándar (200, 201, 400, 404, etc).
 
-**Endpoints típicos:**
-| Método | Ruta                | Descripción                  | Autenticación |
-|--------|---------------------|------------------------------|---------------|
-| GET    | /api/users          | Listar todos los usuarios    | ✅/❌          |
-| GET    | /api/users/{id}     | Obtener usuario por ID       | ✅/❌          |
-| GET    | /api/users/email    | Obtener usuario por email    | ✅/❌          |
-| POST   | /api/users          | Crear nuevo usuario          | ❌            |
-| PUT    | /api/users/{email}  | Actualizar usuario           | ✅            |
-| DELETE | /api/users/{email}  | Eliminar usuario             | ✅            |
+**Endpoints actuales:**
+| Método | Ruta                        | Descripción                        | Parámetros         |
+|--------|-----------------------------|------------------------------------|--------------------|
+| GET    | /api/usercontroller         | Listar todos los usuarios          |                    |
+| GET    | /UserById/                  | Obtener usuario por ID             | userId (query)     |
+| GET    | /api/usercontroller         | Obtener usuario por email          | email (query)      |
+| POST   | /api/usercontroller         | Crear nuevo usuario                | body (UserCreate)  |
+| PUT    | /api/usercontroller         | Actualizar usuario                 | id (query), body   |
+| PUT    | /ChangeActiveStatus/        | Cambiar estado activo del usuario  | id (query)         |
+| DELETE | /api/usercontroller         | Eliminar usuario (lógico)          | id (query)         |
+
+**Notas:**
+- Los endpoints de actualización, eliminación y cambio de estado ahora usan el identificador `Guid id` como parámetro de consulta.
+- El endpoint de eliminación realiza una baja lógica (desactiva el usuario).
 
 **Ubicación:**  
 `src/SmartWallet.API/Controllers/UserController.cs`
@@ -90,9 +101,25 @@ Recibe y valida las solicitudes, delega la lógica al servicio y retorna respues
 
 ---
 
-## Ejemplo de uso del repositorio
+## Ejemplo de uso actualizado
 
 ```csharp
+// Obtener todos los usuarios
+public ActionResult<List<UserResponse>> GetAllUsers()
+{
+    var users = _userServices.GetAllUsers();
+    return Ok(users);
+}
+
+// Obtener un usuario por ID
+public ActionResult<UserResponse> GetUserById(Guid userId)
+{
+    var user = _userServices.GetUserById(userId);
+    if (user == null) return NotFound();
+
+    return Ok(user);
+}
+
 // Obtener un usuario por email
 public ActionResult<UserResponse> GetUserByEmail(string email)
 {
@@ -114,22 +141,32 @@ public IActionResult CreateUser([FromBody] UserCreateRequest request)
 }
 
 // Actualizar usuario existente
-[HttpPut("{email}")]
-public IActionResult UpdateUser(string email, [FromBody] UserUpdateDataRequest request)
+[HttpPut("{id}")]
+public IActionResult UpdateUser(Guid id, [FromBody] UserUpdateDataRequest request)
 {
     if (!ModelState.IsValid) return BadRequest(ModelState);
 
-    var updated = _userServices.UpdateUser(email, request);
+    var updated = _userServices.UpdateUser(id, request);
     if (!updated) return NotFound();
 
     return NoContent();
 }
 
-// Eliminar usuario
-[HttpDelete("{email}")]
-public IActionResult DeleteUser(string email)
+// Cambiar estado activo de usuario
+[HttpPut("ChangeActiveStatus/{id}")]
+public IActionResult ChangeUserActiveStatus(Guid id)
 {
-    var deleted = _userServices.DeleteUser(email);
+    var changed = _userServices.ChangeUserActiveStatus(id);
+    if (!changed) return NotFound();
+
+    return NoContent();
+}
+
+// Eliminar usuario (baja lógica)
+[HttpDelete("{id}")]
+public IActionResult DeleteUser(Guid id)
+{
+    var deleted = _userServices.DeleteUser(id);
     if (!deleted) return NotFound();
 
     return NoContent();
