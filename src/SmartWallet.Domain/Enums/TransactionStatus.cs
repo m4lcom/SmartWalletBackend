@@ -1,5 +1,4 @@
-﻿
-namespace SmartWallet.Domain.Enums
+﻿namespace SmartWallet.Domain.Enums
 {
     public enum TransactionStatus
     {
