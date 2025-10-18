@@ -19,7 +19,6 @@ namespace SmartWallet.API.Controllers
         }
 
         // --- consultas ---
-
         // --- obtiene una transaccion por id ---
         [HttpGet("{id:guid}")]
         public async Task<IActionResult> GetById(Guid id)
@@ -46,7 +45,6 @@ namespace SmartWallet.API.Controllers
         }
             
         // --- operaciones de dominio ---
-
         // --- crear deposito ---
         [HttpPost("deposits")]
         public async Task<IActionResult> Deposit([FromBody] DepositRequest request)

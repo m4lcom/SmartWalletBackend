@@ -14,20 +14,16 @@ namespace SmartWallet.Domain.Entities
         [Key]
         public Guid Id { get; private set; }
 
-        [Required]
         public TransactionType Type { get; private set; }
 
         [Column(TypeName = "decimal(18,2)")]
         [Range(0.01, double.MaxValue, ErrorMessage = "El monto debe ser mayor a cero.")]
         public decimal Amount { get; private set; }
 
-        [Required]
         public CurrencyCode CurrencyCode { get; private set; }
 
-        [Required]
         public LedgerStatus Status { get; private set; }
         
-        [Required]
         public DateTimeOffset Timestamp { get; private set; }
         public string? Metadata { get; private set; }
 
@@ -91,8 +87,8 @@ namespace SmartWallet.Domain.Entities
                 - amount,
                 currency,
                 LedgerStatus.Completed,
-                walletId,
                 transactionId,
+                walletId,
                 metadata ?? "Withdrawal");
 
         public static List<TransactionLedger> CreateTransfer(

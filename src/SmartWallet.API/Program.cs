@@ -2,6 +2,7 @@ using DotNetEnv;
 using Microsoft.EntityFrameworkCore;
 using SmartWallet.Application.Abstraction;
 using SmartWallet.Application.Abstractions;
+using SmartWallet.Application.Abstractions.Persistence;
 using SmartWallet.Application.Services;
 using SmartWallet.Infrastructure;
 using SmartWallet.Infrastructure.Persistence.Repositories;
@@ -17,7 +18,7 @@ builder.Configuration
     .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true)
     .AddEnvironmentVariables();
 
-/// --- validar variables de entorno ---
+// --- validar variables de entorno ---
 var jwtSecret = Environment.GetEnvironmentVariable("JWT_SECRET");
 var dbPath = Environment.GetEnvironmentVariable("DB_PATH");
 
@@ -35,11 +36,13 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// --- application y infrastructure ---
+// --- applicacion e infrastructure ---
 builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
 builder.Services.AddScoped<ITransactionService, TransactionService>();
 builder.Services.AddScoped<ITransactionLedgerRepository, TransactionLedgerRepository>();
 builder.Services.AddScoped<ITransactionLedgerService, TransactionLedgerService>();
+builder.Services.AddScoped<IWalletRepository, WalletRepository>();
+
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserServices, UserServices>();
 // --- registrar Dbcontext --- 
@@ -52,11 +55,15 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(options =>
+    {
+        options.SwaggerEndpoint("/swagger/v1/swagger.json", "SmartWallet API v1");
+        // options.RoutePrefix = "swagger";
+    });
 }
 
 app.UseHttpsRedirection();
-app.UseAuthorization();
+app.UseAuthorization(); 
 app.MapControllers();
 
 app.Run();
