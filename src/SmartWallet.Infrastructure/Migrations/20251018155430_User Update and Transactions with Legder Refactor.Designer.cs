@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SmartWallet.Infrastructure;
 
@@ -10,9 +11,11 @@ using SmartWallet.Infrastructure;
 namespace SmartWallet.Infrastructure.Migrations
 {
     [DbContext(typeof(SmartWalletDbContext))]
-    partial class SmartWalletDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251018155430_User Update and Transactions with Legder Refactor")]
+    partial class UserUpdateandTransactionswithLegderRefactor
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.8");
