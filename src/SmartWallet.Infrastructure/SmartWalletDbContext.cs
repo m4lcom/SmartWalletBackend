@@ -26,10 +26,10 @@ namespace SmartWallet.Infrastructure
                 entity.HasKey(t => t.Id);
 
                 entity.Property(t => t.Amount)
-                      .HasConversion<double>();
+                      .HasColumnType("decimal(18,2)");
 
                 entity.HasOne(t => t.Wallet)
-                      .WithMany(w => w.Transactions)
+                      .WithMany()
                       .HasForeignKey(t => t.WalletId)
                       .OnDelete(DeleteBehavior.Restrict);
 
@@ -47,14 +47,10 @@ namespace SmartWallet.Infrastructure
                 entity.Property(l => l.Amount)
                       .HasColumnType("decimal(18,2)");
 
-                entity.HasOne(l => l.SourceWallet)
-                      .WithMany(w => w.SourceLedgers)
-                      .HasForeignKey(l => l.SourceWalletId)
-                      .OnDelete(DeleteBehavior.Restrict);
-
-                entity.HasOne(l => l.DestinationWallet)
-                      .WithMany(w => w.DestinationLedgers)
-                      .HasForeignKey(l => l.DestinationWalletId)
+                entity.HasOne(l => l.Wallet)
+                      .WithMany()
+                      .HasForeignKey(l => l.WalletId)
+                      .HasForeignKey(l => l.WalletId)
                       .OnDelete(DeleteBehavior.Restrict);
             });
         }

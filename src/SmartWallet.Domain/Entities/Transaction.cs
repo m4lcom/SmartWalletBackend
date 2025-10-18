@@ -14,20 +14,16 @@ namespace SmartWallet.Domain.Entities
         [Key]
         public Guid Id { get; private set; }
 
-        [Required]
         public TransactionType Type { get; private set; }
         
         [Range(0.01, double.MaxValue, ErrorMessage = "El monto debe ser mayor a cero.")]
         [Column(TypeName = "decimal(18,2)")]
         public decimal Amount { get; private set; }
         
-        [Required]
         public CurrencyCode CurrencyCode { get; private set; }
 
-        [Required]
         public TransactionStatus Status { get; private set; }
 
-        [Required]
         public DateTimeOffset CreatedAt { get; private set; }
         
         // --- relaciones con wallet origen ---
@@ -41,6 +37,7 @@ namespace SmartWallet.Domain.Entities
 
         [ForeignKey("DestinationWalletId")]
         public Wallet? DestinationWallet { get; private set; }
+
 
         // --- constructores ---
         protected Transaction() { }
@@ -67,6 +64,7 @@ namespace SmartWallet.Domain.Entities
                 CreatedAt = DateTimeOffset.UtcNow;
         }
 
+
         // --- factory methods ---
         public static Transaction CreateDeposit(Guid walletId, decimal amount, CurrencyCode currency)
             => new Transaction(walletId, null, amount, currency, TransactionType.Deposit);
@@ -82,7 +80,7 @@ namespace SmartWallet.Domain.Entities
         {
             if (Status != TransactionStatus.Pending)
             {
-                throw new InvalidOperationException("Solo una transaccion pendiente puede marcarse como Completed.");
+                throw new InvalidOperationException("Solo una transaccion pendiente puede marcarse como Completada.");
             }
             Status = TransactionStatus.Completed;
         }
@@ -91,7 +89,7 @@ namespace SmartWallet.Domain.Entities
         {
             if (Status == TransactionStatus.Completed)
             {
-                throw new InvalidOperationException("No se puede marcar como Failed una transaccion ya completada.");
+                throw new InvalidOperationException("No se puede marcar como Fallida una transaccion ya completada.");
             }
             Status = TransactionStatus.Failed;
         }
@@ -100,7 +98,7 @@ namespace SmartWallet.Domain.Entities
         {
             if (Status == TransactionStatus.Completed)
             {
-                throw new InvalidOperationException("no se puede marcar como Cancelled una transaccion ya completada.");
+                throw new InvalidOperationException("no se puede marcar como Cancelada una transaccion ya completada.");
             }
             Status = TransactionStatus.Canceled;
         }

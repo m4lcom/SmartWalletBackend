@@ -8,6 +8,7 @@ namespace SmartWallet.Domain.Entities;
 
 public class Wallet
 {
+    // --- identidad y metadatos ---
     [Key]
     public Guid Id { get; private set; }
 
@@ -18,7 +19,7 @@ public class Wallet
     [StringLength(100, MinimumLength = 3)]
     public string Name { get; private set; } = string.Empty;
     public CurrencyCode CurrencyCode { get; private set; }
-    
+
     [Required]
     [StringLength(20, MinimumLength = 6, ErrorMessage = "El alias debe tener entre 6 y 20 caracteres.")]
     [RegularExpression(@"^[A-Za-z\.]+$", ErrorMessage = "El alias solo puede contener letras y puntos.")]
@@ -29,13 +30,12 @@ public class Wallet
     public decimal Balance { get; private set; }
     public DateTime CreatedAt { get; private set; }
 
-    private readonly List<Transaction> _transactions = new();
-    public IReadOnlyCollection<Transaction> Transactions => _transactions.AsReadOnly();
 
     // Navegaciones inversas
     public ICollection<TransactionLedger> SourceLedgers { get; private set; } = new List<TransactionLedger>();
     public ICollection<TransactionLedger> DestinationLedgers { get; private set; } = new List<TransactionLedger>();
     public ICollection<Transaction> ReceivedTransfers { get; private set; } = new List<Transaction>();
+
 
     // --- constructores ---
     protected Wallet() { }
@@ -51,32 +51,45 @@ public class Wallet
         CreatedAt = DateTime.UtcNow;
     }
 
-    // -- metodos de dominio -- 
 
-    public void Debit(decimal amount) 
+    // -- metodos internos de invariantes -- 
+    private void Debit(decimal amount)
     {
         if (amount <= 0) throw new InvalidOperationException("El monto debe ser mayor a cero.");
-        if (Balance < amount) throw new InvalidOperationException("Fondos insuficientes");
+        if (Balance < amount) throw new InvalidOperationException("Fondos insuficientes.");
         Balance -= amount;
     }
 
-    public void Credit(decimal amount)
+    private void Credit(decimal amount)
     {
         if (amount <= 0) throw new InvalidOperationException("El monto debe ser mayor a cero.");
         Balance += amount;
     }
 
-    public Transaction CreateTransaction(
-    TransactionType type,
-    decimal amount,
-    Guid? destinationWalletId = null,
-    TransactionStatus status = TransactionStatus.Pending)
+
+    // --- metodos de dominio ---
+    public Transaction Deposit(decimal amount, CurrencyCode currency)
     {
-        var transaction = new Transaction(Id, type, amount, CurrencyCode, destinationWalletId, status);
-        _transactions.Add(transaction);
-        return transaction;
+        Credit(amount);
+        return Transaction.CreateDeposit(Id, amount, currency);
     }
 
+    public Transaction Withdrawal(decimal amount,  CurrencyCode currency)
+    {
+        Debit(amount);
+        return Transaction.CreateWithdrawal(Id, amount, currency);
+    }
+    
+    public Transaction Transfer(Guid destinationWalletId, decimal amount, CurrencyCode currency)
+    {
+        Debit(amount);
+        return Transaction.CreateTransfer(Id, destinationWalletId, amount, currency);
+    }
 
-
+    public void Credit(decimal amount, CurrencyCode currency)
+    {
+        throw new NotImplementedException();
+    }
 }
+
+

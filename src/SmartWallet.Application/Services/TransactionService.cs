@@ -1,4 +1,5 @@
 ﻿using SmartWallet.Application.Abstractions;
+using SmartWallet.Application.Abstractions.Persistence;
 using SmartWallet.Domain.Entities;
 using SmartWallet.Domain.Enums;
 
@@ -8,11 +9,13 @@ namespace SmartWallet.Application.Services
     {
         private readonly ITransactionRepository _transactionRepository;
         private readonly ITransactionLedgerRepository _ledgerRepository;
+        private readonly IWalletRepository _walletRepository;
 
-        public TransactionService(ITransactionRepository transactionRepository, ITransactionLedgerRepository ledgerRepository)
+        public TransactionService(ITransactionRepository transactionRepository, ITransactionLedgerRepository ledgerRepository, IWalletRepository walletRepository)
         {
             _transactionRepository = transactionRepository;
             _ledgerRepository = ledgerRepository;
+            _walletRepository = walletRepository;
         }
 
         // --- consultas ---
@@ -29,34 +32,56 @@ namespace SmartWallet.Application.Services
         // --- operaciones de dominio --- 
         public async Task<Transaction> CreateDepositAsync(Guid walletId, decimal amount, CurrencyCode currency)
         {
-            var transaction = Transaction.CreateDeposit(walletId, amount, currency);
+            var wallet = await _walletRepository.GetByIdAsync(walletId) ?? throw new KeyNotFoundException("Wallet no encontrada.");
+
+            var transaction = wallet.Deposit(amount, currency);
+
             await _transactionRepository.AddAsync(transaction);
             var ledgers = TransactionLedger.FromTransaction(transaction);
             await _ledgerRepository.AddRangeAsync(ledgers);
+
             transaction.MarkAsCompleted();
             await _transactionRepository.UpdateAsync(transaction);
+            await _walletRepository.UpdateAsync(wallet);
             return transaction;
         }
 
         public async Task<Transaction> CreateWithdrawalAsync(Guid walletId, decimal amount, CurrencyCode currency)
         {
-            var transaction = Transaction.CreateWithdrawal(walletId, amount, currency);
+            var wallet = await _walletRepository.GetByIdAsync(walletId) ?? throw new KeyNotFoundException("Wallet no encontrada.");
+
+            var transaction = wallet.Withdrawal(amount, currency);
+
             await _transactionRepository.AddAsync(transaction);
             var ledgers = TransactionLedger.FromTransaction(transaction);
             await _ledgerRepository.AddRangeAsync(ledgers);
+
             transaction.MarkAsCompleted();
+
             await _transactionRepository.UpdateAsync(transaction);
+            await _walletRepository.UpdateAsync(wallet);
+
             return transaction;
         }
 
         public async Task<Transaction> CreateTransferAsync(Guid sourceWalletId, Guid destinationWalletId, decimal amount, CurrencyCode currency)
         {
-            var transaction = Transaction.CreateTransfer(sourceWalletId, destinationWalletId, amount, currency);
+            var sourceWallet = await _walletRepository.GetByIdAsync(sourceWalletId) ?? throw new KeyNotFoundException("Wallet origen no encontrada.");
+
+            var destinationWallet = await _walletRepository.GetByIdAsync(destinationWalletId) ?? throw new KeyNotFoundException("Wallet destino no encontrada.");
+            
+            var transaction = sourceWallet.Transfer(destinationWalletId, amount, currency);
+            destinationWallet.Credit(amount, currency);
+
             await _transactionRepository.AddAsync(transaction);
             var ledgers = TransactionLedger.FromTransaction(transaction);
             await _ledgerRepository.AddRangeAsync(ledgers);
+
             transaction.MarkAsCompleted();
+
             await _transactionRepository.UpdateAsync(transaction);
+            await _walletRepository.UpdateAsync(sourceWallet);
+            await _walletRepository.UpdateAsync(destinationWallet);
             return transaction;
         }
 
