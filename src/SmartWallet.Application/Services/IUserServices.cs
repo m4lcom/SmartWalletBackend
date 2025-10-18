@@ -1,5 +1,5 @@
-﻿using SmartWallet.Contracts.Requests;
-using SmartWallet.Contracts.Responses;
+﻿using Contracts.Requests;
+using Contracts.Responses;
 
 
 namespace SmartWallet.Application.Services

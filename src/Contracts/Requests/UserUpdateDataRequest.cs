@@ -1,11 +1,6 @@
-﻿using SmartWallet.Contracts.Responses;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Contracts.Responses;
 
-namespace SmartWallet.Contracts.Requests
+namespace Contracts.Requests
 {
     public class UserUpdateDataRequest
     {

@@ -13,6 +13,7 @@ namespace SmartWallet.Application.Services
             _ledgerRepository = ledgerRepository;
         }
 
+        // --- consultas ---
         public async Task<TransactionLedger?> GetByIdAsync(Guid id) => await _ledgerRepository.GetByIdAsync(id);
 
         public async Task<List<TransactionLedger>> GetByWalletAsync(Guid walletId) => await _ledgerRepository.GetByWalletAsync(walletId);
@@ -21,33 +22,23 @@ namespace SmartWallet.Application.Services
 
         public async Task<List<TransactionLedger>> GetByDateRangeAsync(DateTime from, DateTime to) => await _ledgerRepository.GetByDateRangeAsync(from, to);
 
-        public async Task<bool> ExistsAsync(Guid id) => await _ledgerRepository.ExistAsync(id);
+        public async Task<bool> ExistsAsync(Guid id) => await _ledgerRepository.ExistsAsync(id);
 
-        public async Task<TransactionLedger> MarkAsCompletedAsync(Guid id)
+        // --- operaciones de dominio ---
+        public async Task<TransactionLedger> CreateReversalAsync(Guid ledgerId, string? metadata = null)
         {
-            var ledger = await _ledgerRepository.GetByIdAsync(id);
-            if (ledger == null) throw new KeyNotFoundException("Ledger no encontrado");
-            ledger.MarkAsCompleted();
-            await _ledgerRepository.UpdateAsync(ledger);
-            return ledger;
+            var ledger = await _ledgerRepository.GetByIdAsync(ledgerId) ?? throw new KeyNotFoundException("Ledger no encontrado");
+            var reversal = ledger.CreateReversal(metadata);
+            await _ledgerRepository.AddAsync(reversal);
+            return reversal;
         }
 
-        public async Task<TransactionLedger> MarkAsFailedAsync(Guid id)
+        public async Task<TransactionLedger> CreateAdjustmentAsync(Guid ledgerId, decimal newAmount, string? metadata = null)
         {
-            var ledger = await _ledgerRepository.GetByIdAsync(id);
-            if (ledger == null) throw new KeyNotFoundException("Ledger no encontrado");
-            ledger.MarkAsFailed();
-            await _ledgerRepository.UpdateAsync(ledger);
-            return ledger;
-        }
-
-        public async Task<TransactionLedger> MarkAsCanceledAsync(Guid id)
-        {
-            var ledger = await _ledgerRepository.GetByIdAsync(id);
-            if (ledger == null) throw new KeyNotFoundException("Ledger no encontrado");
-            ledger.MarkAsCanceled();
-            await _ledgerRepository.UpdateAsync(ledger);
-            return ledger;
+            var ledger = await _ledgerRepository.GetByIdAsync(ledgerId) ?? throw new KeyNotFoundException("Ledger no encontrado");
+            var adjustment = ledger.CreateAdjustment(newAmount, metadata);
+            await _ledgerRepository.AddAsync(adjustment);
+            return adjustment;
         }
     }
 }

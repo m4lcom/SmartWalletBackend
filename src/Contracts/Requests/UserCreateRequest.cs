@@ -1,6 +1,6 @@
-﻿using SmartWallet.Contracts.Responses;
+﻿using Contracts.Responses;
 
-namespace SmartWallet.Contracts.Requests
+namespace Contracts.Requests
 {
     public class UserCreateRequest
     {

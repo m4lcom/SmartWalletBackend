@@ -1,10 +1,8 @@
 ﻿using Application.Abstraction;
 using Microsoft.EntityFrameworkCore;
-using SmartWallet.Infrastructure.Persistance;
 using System.Linq.Expressions;
 
-namespace Infrastructure.Persistence.Repositories;
-
+namespace SmartWallet.Infrastructure.Persistence.Repositories;
 public abstract class BaseRepository<T> : IBaseRepository<T> where T : class
 {
     private readonly SmartWalletDbContext _context;

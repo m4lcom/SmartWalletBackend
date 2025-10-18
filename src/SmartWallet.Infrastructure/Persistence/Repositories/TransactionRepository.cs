@@ -11,18 +11,29 @@ namespace SmartWallet.Infrastructure.Persistence.Repositories
         {
             _context = context;
         }
+
+        // --- persiste una nueva transaccion ---
+        public async Task AddAsync(Transaction transaction)
+        {
+            await _context.Transactions.AddAsync(transaction);
+            await _context.SaveChangesAsync(); 
+        }
+
+        // --- obtiene una transaccion por id ---
         public async Task<Transaction?> GetByIdAsync(Guid transactionId)
         {
             return await _context.Transactions.Include(t => t.Wallet).Include(t => t.DestinationWallet)
                 .FirstOrDefaultAsync(t => t.Id == transactionId);
         }
 
+        // --- obtiene todas las transacciones asociadas a una wallet especifica ---
         public async Task<List<Transaction>> GetByWalletAsync(Guid walletId)
         {
             return await _context.Transactions
                 .Where(t => t.WalletId == walletId).OrderByDescending(t => t.CreatedAt).ToListAsync();
         }
 
+        // --- obtiene todas las transacciones dentro de un rango de fechas ---
         public async Task<List<Transaction>> GetByDateRangeAsync(DateTime from, DateTime to)
         {
             return await _context.Transactions
@@ -31,15 +42,17 @@ namespace SmartWallet.Infrastructure.Persistence.Repositories
                 .ToListAsync();
         }
 
-        public async Task AddAsync(Transaction transaction)
-        {
-            var ledgerEntries = TransactionLedger.FromTransaction(transaction);
-            await _context.TransactionLedgers.AddRangeAsync(ledgerEntries);
-        }
-
+        // --- verifica si existe una transaccion con un id especifico ---
         public async Task<bool> ExistsAsync(Guid transactionId)
         {
-            return await _context.TransactionLedgers.AnyAsync(t => t.SourceTransactionId == transactionId || t.DestinationTransactionId == transactionId);
+            return await _context.Transactions.AnyAsync(t => t.Id == transactionId);
+        }
+
+        // --- actualiza el estado de una transaccion existente ---
+        public async Task UpdateAsync(Transaction transaction)
+        {
+            _context.Transactions.Update(transaction);
+            await _context.SaveChangesAsync();
         }
 
     }

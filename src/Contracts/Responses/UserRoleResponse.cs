@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SmartWallet.Contracts.Responses
+namespace Contracts.Responses
 {
     public enum UserRole
     {
