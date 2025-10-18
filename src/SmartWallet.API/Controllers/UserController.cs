@@ -21,8 +21,8 @@ namespace SmartWallet.API.Controllers
             return Ok(users);
         }
 
-        [HttpGet("/UserById/")]
-        public IActionResult GetUserById([FromQuery] Guid userId)
+        [HttpGet("/UserById/{userId}")]
+        public IActionResult GetUserById([FromRoute] Guid userId)
         {
             var user = _userServices.GetUserById(userId);
             if (user == null)
@@ -31,8 +31,8 @@ namespace SmartWallet.API.Controllers
             }
             return Ok(user);
         }
-        [HttpGet]
-        public IActionResult GetUserByEmail([FromQuery] string email)
+        [HttpGet("/UserByEmail/{email}")]
+        public IActionResult GetUserByEmail([FromRoute] string email)
         {
             var user = _userServices.GetUserByEmail(email);
             if (user == null)
@@ -52,8 +52,8 @@ namespace SmartWallet.API.Controllers
             }
             return Ok();
         }
-        [HttpPut]
-        public IActionResult UpdateUser([FromQuery] Guid id, [FromBody] UserUpdateDataRequest request)
+        [HttpPut("{id}")]
+        public IActionResult UpdateUser([FromRoute] Guid id, [FromBody] UserUpdateDataRequest request)
         {
             var result = _userServices.UpdateUser(id, request);
             if (!result)
@@ -63,8 +63,8 @@ namespace SmartWallet.API.Controllers
             return Ok();
         }
 
-        [HttpPut("/ChangeActiveStatus/")]
-        public IActionResult ChangeUserActiveStatus([FromQuery] Guid id)
+        [HttpPut("/ChangeActiveStatus/{id}")]
+        public IActionResult ChangeUserActiveStatus([FromRoute] Guid id)
         {
             var result = _userServices.ChangeUserActiveStatus(id);
             if (!result)

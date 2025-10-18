@@ -1,55 +1,58 @@
-﻿using Application.Abstraction;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
+using SmartWallet.Application.Abstractions;
 using System.Linq.Expressions;
 
-namespace SmartWallet.Infrastructure.Persistence.Repositories;
-public abstract class BaseRepository<T> : IBaseRepository<T> where T : class
+
+namespace SmartWallet.Infrastructure.Persistence.Repositories
 {
-    private readonly SmartWalletDbContext _context;
-    private readonly DbSet<T> _dbSet;
-
-    protected BaseRepository(SmartWalletDbContext context)
+    public abstract class BaseRepository<T> : IBaseRepository<T> where T : class
     {
-        _context = context;
-        _dbSet = _context.Set<T>();
-    }
+        private readonly SmartWalletDbContext _context;
+        private readonly DbSet<T> _dbSet;
 
-    public virtual List<T> GetAll()
-    {
-        return _dbSet.ToList();
-    }
+        public BaseRepository(SmartWalletDbContext context)
+        {
+            _context = context;
+            _dbSet = _context.Set<T>();
+        }
 
-    public virtual T? GetById(Guid id)
-    {
-        return _dbSet.Find(id);
-    }
+        public virtual List<T> GetAll()
+        {
+            return _dbSet.ToList();
+        }
 
-    public virtual bool Create(T entity)
-    {
-        _dbSet.Add(entity);
-        _context.SaveChanges();
+        public virtual T? GetById(Guid id)
+        {
+            return _dbSet.Find(id);
+        }
 
-        return true;
-    }
+        public virtual bool Create(T entity)
+        {
+            _dbSet.Add(entity);
+            _context.SaveChanges();
 
-    public virtual bool Delete(T entity)
-    {
-        _dbSet.Remove(entity);
-        _context.SaveChanges();
+            return true;
+        }
 
-        return true;
-    }
+        public virtual bool Delete(T entity)
+        {
+            _dbSet.Remove(entity);
+            _context.SaveChanges();
 
-    public virtual bool Update(T entity)
-    {
-        _dbSet.Update(entity);
-        _context.SaveChanges();
+            return true;
+        }
 
-        return true;
-    }
+        public virtual bool Update(T entity)
+        {
+            _dbSet.Update(entity);
+            _context.SaveChanges();
 
-    public virtual List<T> GetByCriteria(Expression<Func<T, bool>> expression)
-    {
-        return _dbSet.Where(expression).ToList();
+            return true;
+        }
+
+        public virtual List<T> GetByCriteria(Expression<Func<T, bool>> expression)
+        {
+            return _dbSet.Where(expression).ToList();
+        }
     }
 }
