@@ -130,3 +130,11 @@ Implementación completa de la vertical `Transaction` y `TransactionLedger`, incl
 - Pendiente: integración con `WalletRepository` para validación de saldo y actualización de balance.
 
 - [Documentación de verticalidad Transaction + Ledger](docs/07-transaction-ledger-vertical.md)
+
+---
+
+## 2025-10-10
+### feature/user-management
+- Documentación completa de la arquitectura de gestión de usuarios en `08-user-management.md`.
+- Implementación de `UserRepository` con método `GetUserByID`.
+- Integración de repositorio, servicio y controlador para operaciones CRUD de usuario.

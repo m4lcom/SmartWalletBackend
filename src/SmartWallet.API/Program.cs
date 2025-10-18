@@ -1,5 +1,6 @@
 using DotNetEnv;
 using Microsoft.EntityFrameworkCore;
+using SmartWallet.Application.Abstraction;
 using SmartWallet.Application.Abstractions;
 using SmartWallet.Application.Abstractions.Persistence;
 using SmartWallet.Application.Services;
@@ -42,6 +43,8 @@ builder.Services.AddScoped<ITransactionLedgerRepository, TransactionLedgerReposi
 builder.Services.AddScoped<ITransactionLedgerService, TransactionLedgerService>();
 builder.Services.AddScoped<IWalletRepository, WalletRepository>();
 
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IUserServices, UserServices>();
 // --- registrar Dbcontext --- 
 builder.Services.AddDbContext<SmartWalletDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
