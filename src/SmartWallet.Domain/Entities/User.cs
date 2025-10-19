@@ -6,7 +6,7 @@ namespace SmartWallet.Domain.Entities
     public class User
     {
         [Key]
-        public Guid UserID { get; private set; }
+        public Guid Id { get; private set; }
         [Required]
         [StringLength(100, MinimumLength = 3, ErrorMessage = "El nombre debe tener entre 3 y 100 caracteres.")]
         public string Name { get; private set; } = string.Empty;
@@ -24,7 +24,7 @@ namespace SmartWallet.Domain.Entities
 
         public User(string name, string email, string passwordHash, UserRole role, bool active)
         {
-            UserID = Guid.NewGuid();
+            Id = Guid.NewGuid();
             Name = name;
             Email = email;
             PasswordHash = passwordHash;

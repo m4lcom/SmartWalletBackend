@@ -1,4 +1,5 @@
 ﻿using Contracts.Responses;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SmartWallet.Application.Services;
 using SmartWallet.Contracts.Requests;
@@ -9,6 +10,7 @@ namespace SmartWallet.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class TransactionsController : ControllerBase
     {
         private readonly ITransactionService _transactionService;

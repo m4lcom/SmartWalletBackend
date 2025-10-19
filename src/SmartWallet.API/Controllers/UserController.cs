@@ -1,11 +1,13 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SmartWallet.Application.Services;
 using Contracts.Requests;
+using Microsoft.AspNetCore.Authorization;
 
 namespace SmartWallet.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Roles = "Admin")]
     public class UserController : Controller
     {
         private readonly IUserServices _userServices;

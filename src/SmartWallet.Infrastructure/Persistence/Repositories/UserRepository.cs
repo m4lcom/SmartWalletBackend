@@ -19,4 +19,9 @@ public class UserRepository : BaseRepository<User>, IUserRepository
         var user = _context.Users.FirstOrDefault(u => u.Email == email);
         return user;
     }
+
+    public async Task<User?> GetUserByEmailAsync(string email)
+    {
+        return await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+    }
 }
