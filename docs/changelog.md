@@ -186,3 +186,34 @@ Incluye emisión de tokens en el login, protección de endpoints con `[Authorize
 - [Documentación de Authentication](docs/05-authentication.md)
 
 ---
+
+## 2025-10-18
+### refactor/service-collection-extensions
+
+### Objetivo
+Separar la configuración de servicios y autenticación de `Program.cs` en métodos de extensión sobre `IServiceCollection`.  
+Esto mejora la legibilidad, modularidad y mantenibilidad del proyecto.
+
+### Pasos de implementación
+1. **Cambios clave en código**
+   - Creación de `ServiceCollectionExtensions` en `Infrastructure/Extensions`.
+   - Se movió el registro de repositorios, servicios de aplicación y `DbContext` a `AddSmartWalletInfrastructure`.
+   - Se movió la configuración de autenticación JWT a `AddJwtAuthentication`.
+   - `Program.cs` reducido a configuración de entorno, orquestación de servicios y pipeline.
+
+2. **Archivos creados/modificados**
+   - `Infrastructure/Extensions/ServiceCollectionExtensions.cs`
+   - `Program.cs` (simplificado)
+
+3. **Dependencias o paquetes añadidos**
+   - Ninguna nueva (se reutilizan las ya existentes: `Microsoft.AspNetCore.Authentication.JwtBearer`, `Microsoft.EntityFrameworkCore.Sqlite`).
+
+### Notas adicionales
+- Se resolvió la ambigüedad entre `IAuthenticationService` de ASP.NET Core y el definido en la aplicación mediante alias en `ServiceCollectionExtensions`.
+- `Program.cs` ahora contiene únicamente:
+  - Carga y validación de variables de entorno.
+  - Configuración mínima (`Jwt:Key`, `ConnectionStrings`).
+  - Registro de servicios vía extensiones.
+  - Pipeline de middleware (`Swagger`, `HttpsRedirection`, `Authentication`, `Authorization`, `Controllers`).
+
+---
