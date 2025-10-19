@@ -18,7 +18,7 @@ namespace SmartWallet.Application.Services
             var users = _userRepository.GetAll();
             var userResponses = users.Select(user => new UserResponse
             {
-                UserID = user.UserID,
+                Id = user.Id,
                 Name = user.Name,
                 Email = user.Email,
                 Role = (UserRole)user.Role,
@@ -35,7 +35,7 @@ namespace SmartWallet.Application.Services
             if (user == null) return null;
             return new UserResponse
             {
-                UserID = user.UserID,
+                Id = user.Id,
                 Name = user.Name,
                 Email = user.Email,
                 Role = (UserRole)user.Role,
@@ -51,7 +51,7 @@ namespace SmartWallet.Application.Services
             if (user == null) return null;
             return new UserResponse
             {
-                UserID = user.UserID,
+                Id = user.Id,
                 Name = user.Name,
                 Email = user.Email,
                 Role = (UserRole)user.Role,

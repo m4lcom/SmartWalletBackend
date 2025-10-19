@@ -1,10 +1,9 @@
-﻿using SmartWallet.Domain.Entities;
+﻿using Contracts.Requests;
+using SmartWallet.Domain.Entities;
 
-
-namespace SmartWallet.Application.Abstractions
+namespace SmartWallet.Application.Abstractions;
+public interface IUserRepository : IBaseRepository<User>
 {
-    public interface IUserRepository : IBaseRepository<User>
-    {
-        User? GetUserByEmail(string email);
-    }
+    User? GetUserByEmail(string email);
+    Task<User?> GetUserByEmailAsync(string email);
 }

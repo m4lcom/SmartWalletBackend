@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using SmartWallet.Application.Services;
 using SmartWallet.Contracts.Responses;
 using SmartWallet.Domain.Entities;
@@ -8,6 +9,7 @@ namespace SmartWallet.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize(Roles = "Admin")]
     public class TransactionLedgersController : ControllerBase
     {
         private readonly ITransactionLedgerService _ledgerService;
