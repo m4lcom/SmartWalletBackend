@@ -25,8 +25,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{02EA681E-C
 		docs\00-setup.md = docs\00-setup.md
 		docs\01-architecture.md = docs\01-architecture.md
 		02-domain-base-model.md = 02-domain-base-model.md
-		docs\04-api-endpoints.md = docs\04-api-endpoints.md
 		docs\03-dbcontext-setup.md = docs\03-dbcontext-setup.md
+		docs\04-api-endpoints.md = docs\04-api-endpoints.md
 		docs\05-authentication.md = docs\05-authentication.md
 		06-transaction-lifecycle.md = 06-transaction-lifecycle.md
 		docs\changelog.md = docs\changelog.md
@@ -35,6 +35,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{02EA681E-C
 		docs\new-feature.md = docs\new-feature.md
 		docs\references.md = docs\references.md
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartWallet.Contracts", "src\SmartWallet.Contracts\SmartWallet.Contracts.csproj", "{10037D81-C98C-44B0-B048-1C16B8C064BD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -94,6 +96,18 @@ Global
 		{24543B5F-D744-4C1C-A32D-F4AE02DA2BAE}.Release|x64.Build.0 = Release|Any CPU
 		{24543B5F-D744-4C1C-A32D-F4AE02DA2BAE}.Release|x86.ActiveCfg = Release|Any CPU
 		{24543B5F-D744-4C1C-A32D-F4AE02DA2BAE}.Release|x86.Build.0 = Release|Any CPU
+		{10037D81-C98C-44B0-B048-1C16B8C064BD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{10037D81-C98C-44B0-B048-1C16B8C064BD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{10037D81-C98C-44B0-B048-1C16B8C064BD}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{10037D81-C98C-44B0-B048-1C16B8C064BD}.Debug|x64.Build.0 = Debug|Any CPU
+		{10037D81-C98C-44B0-B048-1C16B8C064BD}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{10037D81-C98C-44B0-B048-1C16B8C064BD}.Debug|x86.Build.0 = Debug|Any CPU
+		{10037D81-C98C-44B0-B048-1C16B8C064BD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{10037D81-C98C-44B0-B048-1C16B8C064BD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{10037D81-C98C-44B0-B048-1C16B8C064BD}.Release|x64.ActiveCfg = Release|Any CPU
+		{10037D81-C98C-44B0-B048-1C16B8C064BD}.Release|x64.Build.0 = Release|Any CPU
+		{10037D81-C98C-44B0-B048-1C16B8C064BD}.Release|x86.ActiveCfg = Release|Any CPU
+		{10037D81-C98C-44B0-B048-1C16B8C064BD}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -103,6 +117,7 @@ Global
 		{71994A16-29BA-4F27-9E7E-0E20401F622F} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 		{25AD901B-3B89-440F-B9D9-18BE88BC8D4C} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 		{24543B5F-D744-4C1C-A32D-F4AE02DA2BAE} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
+		{10037D81-C98C-44B0-B048-1C16B8C064BD} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {5B7973FA-539F-4172-951E-CC9560139090}

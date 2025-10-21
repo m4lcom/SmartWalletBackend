@@ -1,6 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
+    <ProjectReference Include="..\SmartWallet.Contracts\SmartWallet.Contracts.csproj" />
     <ProjectReference Include="..\SmartWallet.Domain\SmartWallet.Domain.csproj" />
   </ItemGroup>
 

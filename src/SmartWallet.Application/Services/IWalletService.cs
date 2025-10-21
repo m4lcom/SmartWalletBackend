@@ -11,6 +11,7 @@ namespace SmartWallet.Application.Services
 
         public Wallet? GetById(Guid id);
         public void Delete(Guid id);
+        object Create(Guid userId, string name, object currencyCode, string alias, decimal initialBalance);
     }
 
 }

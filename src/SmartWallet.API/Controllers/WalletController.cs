@@ -1,7 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SmartWallet.Application.Services;
+using SmartWallet.Contracts.Responses;
 using SmartWallet.Domain.Entities;
 using SmartWallet.Domain.Enums;
+using SmartWallet.Contracts.Requests;
+
+
 
 namespace SmartWallet.API.Controllers
 {
@@ -29,9 +33,8 @@ namespace SmartWallet.API.Controllers
             if (wallet == null) return NotFound();
             return Ok(wallet);
         }
-
         [HttpPost]
-        public ActionResult<Wallet> Create([FromBody] CreateWalletRequest request)
+        public ActionResult<WalletResponse> Create([FromBody] WalletRequest request)
         {
             var wallet = _service.Create(
                 request.UserId,
@@ -40,7 +43,18 @@ namespace SmartWallet.API.Controllers
                 request.Alias,
                 request.InitialBalance
             );
-            return CreatedAtAction(nameof(GetById), new { id = wallet.WalletID }, wallet);
+
+            var response = new WalletResponse
+            {
+                WalletId = wallet.WalletID,
+                UserId = wallet.UserID,
+                Name = wallet.Name,
+                Alias = wallet.Alias,
+                Balance = wallet.Balance,
+                CreatedAt = wallet.CreatedAt
+            };
+
+            return CreatedAtAction(nameof(GetById), new { id = wallet.WalletID }, response);
         }
 
         [HttpDelete("{id}")]
@@ -51,5 +65,5 @@ namespace SmartWallet.API.Controllers
         }
     }
 
-    public record CreateWalletRequest(Guid UserId, string Name, CurrencyCode CurrencyCode, string Alias, decimal InitialBalance);
+    
 }
