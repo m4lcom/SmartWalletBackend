@@ -1,4 +1,6 @@
-﻿
+﻿using SmartWallet.Domain.Entities;
+using SmartWallet.Domain.Enums;
+
 
 using SmartWallet.Domain.Entities;
 
@@ -16,4 +18,5 @@ namespace SmartWallet.Application.Services
         Task UpdateAsync(Wallet wallet);
         Task DeleteAsync(Wallet wallet);
     }
+
 }

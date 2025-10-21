@@ -23,6 +23,12 @@ builder.Services.AddSwaggerDocumentation();
 builder.Services.AddSmartWalletInfrastructure(builder.Configuration);
 builder.Services.AddJwtAuthentication(builder.Configuration);
 
+
+builder.Services.AddScoped<IWalletRepository, WalletRepository>();
+builder.Services.AddScoped<WalletService>();
+builder.Services.AddScoped<IWalletService, WalletService>();
+
+
 var app = builder.Build();
 
 // --- pipeline ---
