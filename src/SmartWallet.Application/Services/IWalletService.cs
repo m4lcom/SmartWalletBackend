@@ -10,13 +10,12 @@ namespace SmartWallet.Application.Services
     {
         // --- consultas ---
         Task<Wallet?> GetByIdAsync(Guid id);
-        Task<List<Wallet>> GetAllByUserAsync(Guid userId);
         Task<bool> ExistsAsync(Guid id);
 
         // --- operaciones ---
         Task AddAsync(Wallet wallet);
         Task UpdateAsync(Wallet wallet);
-        Task DeleteAsync(Wallet wallet);
+        Task<Wallet> CreateAsync(Guid userId, string name, CurrencyCode currencyCode, string alias, decimal initialBalance);
     }
 
 }

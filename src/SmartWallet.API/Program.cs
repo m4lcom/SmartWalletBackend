@@ -1,5 +1,8 @@
 using DotNetEnv;
+using SmartWallet.Application.Abstractions.Persistence;
+using SmartWallet.Application.Services;
 using SmartWallet.Infrastructure.Extensions;
+using SmartWallet.Infrastructure.Persistence.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 

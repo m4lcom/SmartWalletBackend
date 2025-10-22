@@ -1,10 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Contracts.Requests;
+using Contracts.Responses;
+using Microsoft.AspNetCore.Mvc;
 using SmartWallet.Application.Services;
-using SmartWallet.Contracts.Responses;
 using SmartWallet.Domain.Entities;
 using SmartWallet.Domain.Enums;
-using SmartWallet.Contracts.Requests;
-
 
 
 namespace SmartWallet.API.Controllers
@@ -20,49 +19,45 @@ namespace SmartWallet.API.Controllers
             _service = service;
         }
 
-        [HttpGet]
-        public ActionResult<IEnumerable<Wallet>> GetAll()
-        {
-            return Ok(_service.GetAll());
-        }
+
 
         [HttpGet("{id}")]
-        public ActionResult<Wallet> GetById(Guid id)
+        public async Task<ActionResult<Wallet>> GetById(Guid id)
         {
-            var wallet = _service.GetById(id);
+            var wallet = await _service.GetByIdAsync(id);
             if (wallet == null) return NotFound();
             return Ok(wallet);
         }
+
         [HttpPost]
-        public ActionResult<WalletResponse> Create([FromBody] WalletRequest request)
+        public async Task<ActionResult<WalletResponse>> CreateAsync([FromBody] WalletRequest request)
         {
-            var wallet = _service.Create(
+            if (!Enum.TryParse<CurrencyCode>(request.CurrencyCode, true, out var currency))
+                return BadRequest("Código de moneda inválido.");
+
+            var wallet = await _service.CreateAsync(
                 request.UserId,
                 request.Name,
-                request.CurrencyCode,
+                currency,
                 request.Alias,
                 request.InitialBalance
             );
 
+
             var response = new WalletResponse
             {
-                WalletId = wallet.WalletID,
+                Id = wallet.Id,
                 UserId = wallet.UserID,
                 Name = wallet.Name,
+                CurrencyCode = currency.ToString(),
                 Alias = wallet.Alias,
                 Balance = wallet.Balance,
                 CreatedAt = wallet.CreatedAt
             };
 
-            return CreatedAtAction(nameof(GetById), new { id = wallet.WalletID }, response);
+            return CreatedAtAction(nameof(GetById), new { id = wallet.Id }, response);
         }
 
-        [HttpDelete("{id}")]
-        public IActionResult Delete(Guid id)
-        {
-            _service.Delete(id);
-            return NoContent();
-        }
     }
 
     

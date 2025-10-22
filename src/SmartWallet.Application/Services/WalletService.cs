@@ -1,4 +1,4 @@
-﻿using SmartWallet.Application.Interfaces;
+﻿using SmartWallet.Application.Abstractions.Persistence;
 using SmartWallet.Domain.Entities;
 using SmartWallet.Domain.Enums;
 
@@ -13,17 +13,33 @@ namespace SmartWallet.Application.Services
             _repository = repository;
         }
 
-        public IEnumerable<Wallet> GetAll() => _repository.GetAll();
-
-        public Wallet? GetById(Guid id) => _repository.GetById(id);
-
-        public Wallet Create(Guid userId, string name, CurrencyCode currency, string alias, decimal initialBalance = 0)
+        public Task<Wallet?> GetByIdAsync(Guid id)
         {
-            var wallet = new Wallet(userId, name, currency, alias, initialBalance);
-            _repository.Add(wallet);
+            return _repository.GetByIdAsync(id);
+        }
+
+        public async Task<Wallet> CreateAsync(Guid userId, string name, CurrencyCode currencyCode, string alias, decimal initialBalance = 0)
+        {
+            var wallet = new Wallet(userId, name, currencyCode, alias, initialBalance);
+            await _repository.AddAsync(wallet); // ahora sí esperás la operación asíncrona
             return wallet;
         }
 
-        public void Delete(Guid id) => _repository.Delete(id);
+        public Task<bool> ExistsAsync(Guid id)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task AddAsync(Wallet wallet)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task UpdateAsync(Wallet wallet)
+        {
+            throw new NotImplementedException();
+        }
+
+
     }
 }

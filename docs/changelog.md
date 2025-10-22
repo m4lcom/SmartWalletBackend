@@ -217,3 +217,50 @@ Esto mejora la legibilidad, modularidad y mantenibilidad del proyecto.
   - Pipeline de middleware (`Swagger`, `HttpsRedirection`, `Authentication`, `Authorization`, `Controllers`).
 
 ---
+
+## 2025-10-21
+### feature/wallet-management
+
+### Objetivo
+Implementación completa de la entidad `Wallet`, repositorio, servicio de aplicación y endpoints de API para la gestión de billeteras de usuario en SmartWallet.
+
+### Cambios principales
+
+- **Domain**
+  - `Domain/Entities/Wallet.cs`
+    - Propiedades: `Id`, `UserID`, `Name`, `CurrencyCode`, `Alias`, `Balance`, `CreatedAt`
+    - Navegaciones: `SourceLedgers`, `DestinationLedgers`, `ReceivedTransfers`
+    - Validaciones con DataAnnotations (`[Required]`, `[StringLength]`, `[Range]`, `[Column(TypeName="decimal(18,2)")]`, `[RegularExpression]`)
+    - Métodos de dominio:
+      - `Deposit(decimal amount, CurrencyCode currency)`
+      - `Withdrawal(decimal amount, CurrencyCode currency)`
+      - `Transfer(Guid destinationWalletId, decimal amount, CurrencyCode currency)`
+    - Métodos internos de invariantes: `Credit`, `Debit`
+
+- **Enums**
+  - `Domain/Enums/CurrencyCode.cs`
+    - ARS = 32
+    - USD = 840
+    - EUR = 978
+    - BRL = 986
+
+- **Application**
+  - `Application/Services/IWalletService.cs`
+    - Métodos: `GetByIdAsync`, `ExistsAsync`, `AddAsync`, `UpdateAsync`, `CreateAsync`
+  - Definición de la capa de aplicación desacoplada del repositorio
+
+- **Infrastructure**
+  - `Infrastructure/Persistence/Repositories/WalletRepository.cs`
+    - Implementación de `IWalletRepository`
+    - Métodos: `GetByIdAsync`, `ExistsAsync`, `AddAsync`, `UpdateAsync`
+    - Pendiente: `GetByAliasAsync`
+  - `Infrastructure/SmartWalletDbContext.cs`
+    - DbSet<Wallet>
+    - Configuración de relaciones y precisión decimal en OnModelCreating
+
+- **Endpoints / API**
+  - Pendiente: integración de Wallet con Transacciones y validación de saldo
+  - Preparación para la exposición de endpoints REST para CRUD de Wallet
+
+### Documentación
+- [Documentación de Wallet](docs/09-wallet.md)
