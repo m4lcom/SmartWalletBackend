@@ -1,5 +1,8 @@
 using DotNetEnv;
+using SmartWallet.Application.Abstractions.Persistence;
+using SmartWallet.Application.Services;
 using SmartWallet.Infrastructure.Extensions;
+using SmartWallet.Infrastructure.Persistence.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,6 +24,12 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerDocumentation();
 builder.Services.AddSmartWalletInfrastructure(builder.Configuration);
+
+
+builder.Services.AddScoped<IWalletRepository, WalletRepository>();
+builder.Services.AddScoped<WalletService>();
+builder.Services.AddScoped<IWalletService, WalletService>();
+
 
 var app = builder.Build();
 
