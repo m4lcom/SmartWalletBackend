@@ -33,6 +33,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{02EA681E-C
 		docs\08-user-management.md = docs\08-user-management.md
 		docs\changelog.md = docs\changelog.md
 		09-wallet-management.md = 09-wallet-management.md
+		docs\10-httpclient-polly.md = docs\10-httpclient-polly.md
 		docs\conventions.md = docs\conventions.md
 		docs\environment.md = docs\environment.md
 		docs\new-feature.md = docs\new-feature.md

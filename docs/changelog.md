@@ -264,3 +264,12 @@ Implementación completa de la entidad `Wallet`, repositorio, servicio de aplica
 
 ### Documentación
 - [Documentación de Wallet](docs/09-wallet.md)
+## 2025-10-24 — docs: documentación y changelog para HttpClient y Polly (DolarApi)
+- Tipo: `docs`
+- Descripción: Se añade documentación técnica que explica la integración de `HttpClient` con políticas de resiliencia de `Polly` para el servicio `DolarApi`. Incluye ejemplos de `appsettings.json`, explicación de `ApiClientConfiguration`, `DolarApiOptions`, y la extensión de registro de servicios `AddDolarApi`.
+- Archivos añadidos/actualizados:
+  - `docs/httpclient-polly.md` (nuevo)
+  - `docs/changelog.md` (actualizado)
+- Notas de migración:
+  - Asegúrate de incluir los nuevos archivos en la solución como Solution Items en __Solution Explorer__ bajo la carpeta `docs`.
+  - Commit recomendado: `docs: add httpclient + polly docs for DolarApi`

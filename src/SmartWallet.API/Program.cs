@@ -24,7 +24,6 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerDocumentation();
 builder.Services.AddSmartWalletInfrastructure(builder.Configuration);
-builder.Services.AddJwtAuthentication(builder.Configuration);
 
 
 builder.Services.AddScoped<IWalletRepository, WalletRepository>();
