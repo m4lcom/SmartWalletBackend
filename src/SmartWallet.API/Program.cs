@@ -21,7 +21,6 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerDocumentation();
 builder.Services.AddSmartWalletInfrastructure(builder.Configuration);
-builder.Services.AddJwtAuthentication(builder.Configuration);
 
 var app = builder.Build();
 
