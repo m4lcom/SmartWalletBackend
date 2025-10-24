@@ -11,6 +11,9 @@ public static class SwaggerServiceExtensions
         {
             c.SwaggerDoc("v1", new OpenApiInfo { Title = "SmartWallet API", Version = "v1" });
 
+            // ✅ Evita conflictos de tipos con el mismo nombre (causa del error 500)
+            c.CustomSchemaIds(type => type.FullName);
+
             // --- definición de seguridad ---
             c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
             {
@@ -42,4 +45,3 @@ public static class SwaggerServiceExtensions
         return services;
     }
 }
-
