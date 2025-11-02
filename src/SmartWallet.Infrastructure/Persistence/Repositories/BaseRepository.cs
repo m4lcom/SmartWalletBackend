@@ -2,7 +2,6 @@
 using SmartWallet.Application.Abstractions;
 using System.Linq.Expressions;
 
-
 namespace SmartWallet.Infrastructure.Persistence.Repositories
 {
     public abstract class BaseRepository<T> : IBaseRepository<T> where T : class
@@ -16,43 +15,40 @@ namespace SmartWallet.Infrastructure.Persistence.Repositories
             _dbSet = _context.Set<T>();
         }
 
-        public virtual List<T> GetAll()
+        public virtual async Task<List<T>> GetAllAsync()
         {
-            return _dbSet.ToList();
+            return await _dbSet.ToListAsync();
         }
 
-        public virtual T? GetById(Guid id)
+        public virtual async Task<T?> GetByIdAsync(Guid id)
         {
-            return _dbSet.Find(id);
+            return await _dbSet.FindAsync(id);
         }
 
-        public virtual bool Create(T entity)
+        public virtual async Task<bool> CreateAsync(T entity)
         {
-            _dbSet.Add(entity);
-            _context.SaveChanges();
-
+            await _dbSet.AddAsync(entity);
+            await _context.SaveChangesAsync();
             return true;
         }
 
-        public virtual bool Delete(T entity)
+        public virtual async Task<bool> DeleteAsync(T entity)
         {
             _dbSet.Remove(entity);
-            _context.SaveChanges();
-
+            await _context.SaveChangesAsync();
             return true;
         }
 
-        public virtual bool Update(T entity)
+        public virtual async Task<bool> UpdateAsync(T entity)
         {
             _dbSet.Update(entity);
-            _context.SaveChanges();
-
+            await _context.SaveChangesAsync();
             return true;
         }
 
-        public virtual List<T> GetByCriteria(Expression<Func<T, bool>> expression)
+        public virtual async Task<List<T>> GetByCriteriaAsync(Expression<Func<T, bool>> expression)
         {
-            return _dbSet.Where(expression).ToList();
+            return await _dbSet.Where(expression).ToListAsync();
         }
     }
 }

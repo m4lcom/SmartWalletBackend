@@ -5,11 +5,11 @@ namespace SmartWallet.Application.Abstractions
 {
     public interface IBaseRepository<T> where T : class
     {
-        List<T> GetAll();
-        T? GetById(Guid id);
-        bool Create(T entity);
-        bool Update(T entity);
-        bool Delete(T entity);
-        List<T> GetByCriteria(Expression<Func<T, bool>> expression);
+        Task<List<T>> GetAllAsync();
+        Task<T?> GetByIdAsync(Guid id);
+        Task<bool> CreateAsync(T entity);
+        Task<bool> UpdateAsync(T entity);
+        Task<bool> DeleteAsync(T entity);
+        Task<List<T>> GetByCriteriaAsync(Expression<Func<T, bool>> expression);
     }
 }

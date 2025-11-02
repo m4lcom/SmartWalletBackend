@@ -17,16 +17,16 @@ namespace SmartWallet.API.Controllers
         }
 
         [HttpGet()]
-        public IActionResult GetAllUsers()
+        public async Task<IActionResult> GetAllUsers()
         {
-            var users = _userServices.GetAllUsers();
+            var users = await _userServices.GetAllUsers();
             return Ok(users);
         }
 
         [HttpGet("/UserById/{userId}")]
-        public IActionResult GetUserById([FromRoute] Guid userId)
+        public async Task<IActionResult> GetUserById([FromRoute] Guid userId)
         {
-            var user = _userServices.GetUserById(userId);
+            var user = await _userServices.GetUserById(userId);
             if (user == null)
             {
                 return NotFound();
@@ -34,9 +34,9 @@ namespace SmartWallet.API.Controllers
             return Ok(user);
         }
         [HttpGet("/UserByEmail/{email}")]
-        public IActionResult GetUserByEmail([FromRoute] string email)
+        public async Task<IActionResult> GetUserByEmail([FromRoute] string email)
         {
-            var user = _userServices.GetUserByEmail(email);
+            var user = await _userServices.GetUserByEmail(email);
             if (user == null)
             {
                 return NotFound();
@@ -44,10 +44,21 @@ namespace SmartWallet.API.Controllers
             return Ok(user);
         }
 
-        [HttpPost]
-        public IActionResult CreateUser([FromBody]  UserCreateRequest request)
+        [HttpPost("/RegisterUser")]
+        public async Task<IActionResult> RegisterUser([FromBody] UserCreateRequest request)
         {
-            var result = _userServices.CreateUser(request);
+            var result = await _userServices.RegisterUser(request);
+            if (!result)
+            {
+                return BadRequest();
+            }
+            return Ok();
+        }
+
+        [HttpPost("/CreateUser")]
+        public async Task<IActionResult> CreateUser([FromBody]  UserCreateRequest request)
+        {
+            var result = await _userServices.CreateUser(request);
             if (!result)
             {
                 return BadRequest();
@@ -55,9 +66,9 @@ namespace SmartWallet.API.Controllers
             return Ok();
         }
         [HttpPut("{id}")]
-        public IActionResult UpdateUser([FromRoute] Guid id, [FromBody] UserUpdateDataRequest request)
+        public async Task<IActionResult> UpdateUser([FromRoute] Guid id, [FromBody] UserUpdateDataRequest request)
         {
-            var result = _userServices.UpdateUser(id, request);
+            var result = await _userServices.UpdateUser(id, request);
             if (!result)
             {
                 return BadRequest();
@@ -66,9 +77,9 @@ namespace SmartWallet.API.Controllers
         }
 
         [HttpPut("/ChangeActiveStatus/{id}")]
-        public IActionResult ChangeUserActiveStatus([FromRoute] Guid id)
+        public async Task<IActionResult> ChangeUserActiveStatus([FromRoute] Guid id)
         {
-            var result = _userServices.ChangeUserActiveStatus(id);
+            var result = await _userServices.ChangeUserActiveStatus(id);
             if (!result)
             {
                 return BadRequest();
@@ -77,9 +88,9 @@ namespace SmartWallet.API.Controllers
         }
 
         [HttpDelete]
-        public IActionResult DeleteUser([FromQuery] Guid id)
+        public async Task<IActionResult> DeleteUser([FromQuery] Guid id)
         {
-            var result = _userServices.DeleteUser(id);
+            var result = await _userServices.DeleteUser(id);
             if (!result)
             {
                 return BadRequest();

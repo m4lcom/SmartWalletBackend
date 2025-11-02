@@ -273,3 +273,18 @@ Implementación completa de la entidad `Wallet`, repositorio, servicio de aplica
 - Notas de migración:
   - Asegúrate de incluir los nuevos archivos en la solución como Solution Items en __Solution Explorer__ bajo la carpeta `docs`.
   - Commit recomendado: `docs: add httpclient + polly docs for DolarApi`
+
+---
+
+## 2025-11-02 — refactor: UsersAsync
+- Actualizado: `docs/08-user-management.md`
+  - Refleja la implementación real de repositorios (`*Async`), servicios (`IUserServices` / `UserServices`) y rutas del controlador `UserController`.
+  - Documentadas las rutas absolutas presentes en el controlador (`/UserById/{userId}`, `/UserByEmail/{email}`, `/RegisterUser`, `/CreateUser`, `/ChangeActiveStatus/{id}`) y la ruta base `api/User`.
+  - Aclarado que el controlador aplica `[Authorize(Roles = "Admin")]`.
+  - Especificado comportamiento de `RegisterUser`, `CreateUser`, `UpdateUser`, `ChangeUserActiveStatus` y `DeleteUser` (baja lógica).
+- Archivos revisados (implementación actual):
+  - `src/SmartWallet.API/Controllers/UserController.cs`
+  - `src/SmartWallet.Application/Services/UserServices.cs`
+  - `src/SmartWallet.Application/Services/IUserServices.cs`
+  - `src/SmartWallet.Application/Abstractions/IUserRepository.cs`
+  - `src/SmartWallet.Infrastructure/Persistence/Repositories/UserRepository.cs`
