@@ -1,60 +1,62 @@
 ﻿# Gestión de Usuarios (User Management)
 
 ## Objetivo
-Definir la arquitectura y responsabilidades de los componentes encargados de la gestión de usuarios en SmartWallet, abarcando repositorios, servicios de aplicación y controladores API.
+Definir la arquitectura y responsabilidades de los componentes encargados de la gestión de usuarios en SmartWallet, reflejando la implementación actual de repositorios, servicios y controlador API.
 
 ---
 
 ## Componentes
 
 ### 1. Repositorio de Usuario (`IUserRepository` / `UserRepository`)
-Responsable del acceso a datos de la entidad `User`.  
-Permite desacoplar la lógica de persistencia de la lógica de negocio.
+Responsable del acceso a datos de la entidad `User`. Desacopla la persistencia de la lógica de negocio y expone métodos asincrónicos usados por la capa de servicios.
 
 **Responsabilidades:**
 - Obtener todos los usuarios.
 - Buscar usuario por ID o email.
-- Crear, actualizar y eliminar usuarios.
+- Crear, actualizar y (lógica de) eliminar usuarios.
 
-**Métodos principales:**
-- `IEnumerable<User> GetAll()`
-- `User? GetById(Guid id)`
-- `User? GetUserByEmail(string email)`
-- `void Create(User user)`
-- `void Update(User user)`
-- `void Delete(User user)`
+**Firmas principales (implementación actual):**
+- `Task<IEnumerable<User>> GetAllAsync()`
+- `Task<User?> GetByIdAsync(Guid id)`
+- `Task<User?> GetUserByEmailAsync(string email)`
+- `Task CreateAsync(User user)`
+- `Task UpdateAsync(User user)`
+- (La eliminación física no se usa; se emplea desactivación lógica vía `UpdateAsync`)
 
 **Implementación destacada:**
-- El método `GetUserByEmail` permite buscar eficientemente un usuario por su correo electrónico usando LINQ sobre el contexto de EF Core.
+- `GetUserByEmailAsync` realiza la búsqueda por correo usando EF Core / LINQ en el contexto de persistencia.
 
 **Ubicación:**  
-`src/SmartWallet.Application/Abstraction/IUserRepository.cs`  
+`src/SmartWallet.Application/Abstractions/IUserRepository.cs`  
 `src/SmartWallet.Infrastructure/Persistence/Repositories/UserRepository.cs`
 
 ---
 
 ### 2. Servicio de Usuario (`IUserServices` / `UserServices`)
-Contiene la lógica de negocio y casos de uso relacionados con usuarios.  
-Orquesta la interacción entre los controladores y los repositorios.
+Contiene la lógica de negocio y casos de uso relacionados con usuarios. Orquesta la interacción entre controladores y repositorios, mapea entidades a DTOs y aplica validaciones/reglas.
 
 **Responsabilidades:**
-- Exponer operaciones de alto nivel para la gestión de usuarios.
-- Validar reglas de negocio antes de acceder al repositorio.
-- Mapear entidades de dominio a DTOs de respuesta.
+- Exponer operaciones asincrónicas de alto nivel para la gestión de usuarios.
+- Validar reglas de negocio (p. ej. unicidad de email) antes de persistir.
+- Mapear entidades de dominio a `Contracts.Responses.UserResponse` y recibir `Contracts.Requests.*`.
 
-**Métodos principales:**
-- `List<UserResponse> GetAllUsers()`
-- `UserResponse? GetUserById(Guid id)`
-- `UserResponse? GetUserByEmail(string email)`
-- `bool CreateUser(UserCreateRequest request)`
-- `bool UpdateUser(Guid id, UserUpdateDataRequest request)`
-- `bool ChangeUserActiveStatus(Guid id)`
-- `bool DeleteUser(Guid id)`
+**Firmas principales (implementación actual):**
+- `Task<List<UserResponse>> GetAllUsers()`
+- `Task<UserResponse?> GetUserById(Guid id)`
+- `Task<UserResponse?> GetUserByEmail(string email)`
+- `Task<bool> RegisterUser(UserCreateRequest request)`
+- `Task<bool> CreateUser(UserCreateRequest request)`
+- `Task<bool> UpdateUser(Guid id, UserUpdateDataRequest request)`
+- `Task<bool> ChangeUserActiveStatus(Guid id)`
+- `Task<bool> DeleteUser(Guid id)`
 
-**Cambios recientes:**
-- Ahora las operaciones de actualización, cambio de estado activo y eliminación usan el `Guid id` del usuario en vez del email.
-- Se agregó el método `ChangeUserActiveStatus(Guid id)` para alternar el estado activo/inactivo del usuario.
-- La eliminación lógica (`DeleteUser`) ahora solo desactiva el usuario (no lo borra físicamente).
+**Cambios y comportamientos relevantes:**
+- Todos los métodos son asincrónicos (`Task<...>`).
+- `RegisterUser` crea un usuario con rol por defecto `Regular` y valida que el email no exista.
+- `CreateUser` permite crear usuarios asignando rol explícito (usado por APIs internas o admin).
+- `UpdateUser` actualiza campos permitidos (nombre, contraseña, rol, active) usando `Guid id`.
+- `ChangeUserActiveStatus` alterna el flag `Active`.
+- `DeleteUser` realiza una baja lógica estableciendo `Active = false` y persistiendo el cambio.
 
 **Ubicación:**  
 `src/SmartWallet.Application/Services/IUserServices.cs`  
@@ -63,28 +65,29 @@ Orquesta la interacción entre los controladores y los repositorios.
 ---
 
 ### 3. Controlador de Usuario (`UserController`)
-Expone los endpoints HTTP para la gestión de usuarios.  
-Recibe y valida las solicitudes, delega la lógica al servicio y retorna respuestas adecuadas.
+Expone los endpoints HTTP. Todos los handlers delegan en `IUserServices` y retornan `IActionResult`. El controlador requiere autorización con rol `Admin`.
 
-**Responsabilidades:**
-- Definir rutas y métodos HTTP para operaciones CRUD de usuario.
-- Validar datos de entrada (model binding, DataAnnotations).
-- Retornar respuestas HTTP estándar (200, 201, 400, 404, etc).
+**Atributos clave:**
+- `[Route("api/[controller]")]`
+- `[ApiController]`
+- `[Authorize(Roles = "Admin")]`
 
-**Endpoints actuales:**
-| Método | Ruta                        | Descripción                        | Parámetros         |
-|--------|-----------------------------|------------------------------------|--------------------|
-| GET    | /api/usercontroller         | Listar todos los usuarios          |                    |
-| GET    | /UserById/                  | Obtener usuario por ID             | userId (query)     |
-| GET    | /api/usercontroller         | Obtener usuario por email          | email (query)      |
-| POST   | /api/usercontroller         | Crear nuevo usuario                | body (UserCreate)  |
-| PUT    | /api/usercontroller         | Actualizar usuario                 | id (query), body   |
-| PUT    | /ChangeActiveStatus/        | Cambiar estado activo del usuario  | id (query)         |
-| DELETE | /api/usercontroller         | Eliminar usuario (lógico)          | id (query)         |
+**Endpoints actuales (rutas tal y como están en el código):**
+| Método | Ruta                                 | Descripción                                 | Parámetros / DTOs |
+|--------|--------------------------------------|---------------------------------------------|-------------------|
+| GET    | `/api/User`                          | Listar todos los usuarios                   | —                 |
+| GET    | `/UserById/{userId}`                 | Obtener usuario por ID                      | route: `userId`   |
+| GET    | `/UserByEmail/{email}`               | Obtener usuario por email                   | route: `email`    |
+| POST   | `/RegisterUser`                      | Registro público (crea usuario Regular)     | body: `UserCreateRequest` |
+| POST   | `/CreateUser`                        | Crear usuario (admin)                       | body: `UserCreateRequest` |
+| PUT    | `/api/User/{id}`                     | Actualizar usuario                          | route: `id`, body: `UserUpdateDataRequest` |
+| PUT    | `/ChangeActiveStatus/{id}`           | Alternar estado activo del usuario          | route: `id`       |
+| DELETE | `/api/User` (DELETE con query `id`)  | Eliminar usuario (baja lógica, query param) | query: `id`       |
 
-**Notas:**
-- Los endpoints de actualización, eliminación y cambio de estado ahora usan el identificador `Guid id` como parámetro de consulta.
-- El endpoint de eliminación realiza una baja lógica (desactiva el usuario).
+Notas:
+- Las rutas que comienzan con `/` en los atributos del controlador (p. ej. `"/UserById/{userId}"`) son rutas absolutas y no incluyen el prefijo `api/[controller]`.
+- Todas las acciones usan `IUserServices` y la mayoría devuelven códigos estándar: `200 OK`, `204 NoContent` (en diseños alternativos), `400 BadRequest` y `404 NotFound` según resultado.
+- El controlador aplica `[Authorize(Roles = "Admin")]`: solo administradores pueden invocar estas rutas en el despliegue actual. Si algunas rutas deben ser públicas (p. ej. `RegisterUser`), ajustar el atributo `Authorize` o anularlo con `[AllowAnonymous]`.
 
 **Ubicación:**  
 `src/SmartWallet.API/Controllers/UserController.cs`
@@ -93,15 +96,16 @@ Recibe y valida las solicitudes, delega la lógica al servicio y retorna respues
 
 ## Flujo de una operación típica
 
-1. **Controller** recibe la solicitud HTTP y valida el modelo.
-2. Llama al **servicio** correspondiente (`UserServices`).
-3. El servicio ejecuta la lógica de negocio y utiliza el **repositorio** para acceder a los datos.
-4. El resultado se mapea a un DTO de respuesta y se retorna al controller.
-5. El controller responde al cliente con el resultado y el código HTTP adecuado.
+1. El cliente realiza una petición HTTP al `UserController`.
+2. El controlador valida el modelo (model binding / DataAnnotations) y las credenciales (Authorize).
+3. El controlador llama al método asincrónico del servicio (`IUserServices`).
+4. El servicio aplica la lógica de negocio y usa `IUserRepository` (métodos `*Async`) para persistencia.
+5. El servicio mapea entidades a `Contracts.Responses.UserResponse` y devuelve resultado al controlador.
+6. El controlador construye la respuesta HTTP apropiada.
 
 ---
 
-## Ejemplo de uso actualizado
+## Ejemplos de uso actualizados (firmas y rutas reales)
 
 ```csharp
 // Obtener todos los usuarios
@@ -129,8 +133,19 @@ public ActionResult<UserResponse> GetUserByEmail(string email)
     return Ok(user);
 }
 
-// Crear un nuevo usuario
+// Registrar un nuevo usuario (público)
 [HttpPost]
+public IActionResult RegisterUser([FromBody] UserCreateRequest request)
+{
+    if (!ModelState.IsValid) return BadRequest(ModelState);
+
+    _userServices.RegisterUser(request);
+
+    return CreatedAtAction(nameof(GetUserById), new { id = request.Id }, request);
+}
+
+// Crear un nuevo usuario (admin)
+[HttpPost("CreateUser")]
 public IActionResult CreateUser([FromBody] UserCreateRequest request)
 {
     if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -171,4 +186,3 @@ public IActionResult DeleteUser(Guid id)
 
     return NoContent();
 }
-
