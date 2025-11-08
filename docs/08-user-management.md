@@ -1,7 +1,7 @@
 ﻿# Gestión de Usuarios (User Management)
 
 ## Objetivo
-Definir la arquitectura y responsabilidades de los componentes encargados de la gestión de usuarios en SmartWallet, reflejando la implementación actual de repositorios, servicios y controlador API.
+Documentar la implementación actual de la gestión de usuarios en SmartWallet, reflejando el código real de `UserController` y `UserServices`.
 
 ---
 
@@ -10,30 +10,36 @@ Definir la arquitectura y responsabilidades de los componentes encargados de la 
 ### 1. Repositorio de Usuario (`IUserRepository` / `UserRepository`)
 Responsable del acceso a datos de la entidad `User`. Desacopla la persistencia de la lógica de negocio y expone métodos asincrónicos usados por la capa de servicios.
 
-**Responsabilidades:**
-- Obtener todos los usuarios.
-- Buscar usuario por ID o email.
-- Crear, actualizar y (lógica de) eliminar usuarios.
-
-**Firmas principales (implementación actual):**
+Firmas principales (implementación esperada en la capa de persistencia):
 - `Task<IEnumerable<User>> GetAllAsync()`
 - `Task<User?> GetByIdAsync(Guid id)`
 - `Task<User?> GetUserByEmailAsync(string email)`
-- `Task CreateAsync(User user)`
+- `Task<bool> CreateAsync(User user)` (la implementación actual devuelve bool)
 - `Task UpdateAsync(User user)`
-- (La eliminación física no se usa; se emplea desactivación lógica vía `UpdateAsync`)
+- `Task DeleteAsync(User user)` (usada internamente en rollback)
 
-**Implementación destacada:**
-- `GetUserByEmailAsync` realiza la búsqueda por correo usando EF Core / LINQ en el contexto de persistencia.
-
-**Ubicación:**  
-`src/SmartWallet.Application/Abstractions/IUserRepository.cs`  
-`src/SmartWallet.Infrastructure/Persistence/Repositories/UserRepository.cs`
+Ubicación:
+- `src/SmartWallet.Application/Abstractions/IUserRepository.cs`
+- `src/SmartWallet.Infrastructure/Persistence/Repositories/UserRepository.cs`
 
 ---
 
 ### 2. Servicio de Usuario (`IUserServices` / `UserServices`)
-Contiene la lógica de negocio y casos de uso relacionados con usuarios. Orquesta la interacción entre controladores y repositorios, mapea entidades a DTOs y aplica validaciones/reglas.
+Interfaz pública:
+
+```csharp
+public interface IUserServices
+{
+    Task<List<UserResponse>> GetAllUsers();
+    Task<UserResponse?> GetUserById(Guid id);
+    Task<UserResponse?> GetUserByEmail(string email);
+    Task<bool> RegisterUser(UserCreateRequest request);
+    Task<bool> CreateUser(UserCreateRequest request);
+    Task<bool> UpdateUser(Guid id, UserUpdateDataRequest request);
+    Task<bool> ChangeUserActiveStatus(Guid id);
+    Task<bool> DeleteUser(Guid id);
+}
+```
 
 **Responsabilidades:**
 - Exponer operaciones asincrónicas de alto nivel para la gestión de usuarios.
@@ -58,131 +64,110 @@ Contiene la lógica de negocio y casos de uso relacionados con usuarios. Orquest
 - `ChangeUserActiveStatus` alterna el flag `Active`.
 - `DeleteUser` realiza una baja lógica estableciendo `Active = false` y persistiendo el cambio.
 
-**Ubicación:**  
-`src/SmartWallet.Application/Services/IUserServices.cs`  
-`src/SmartWallet.Application/Services/UserServices.cs`
+Implementación (`UserServices`) — comportamientos clave:
+- Mapea entidades `User` a `Contracts.Responses.UserResponse` para los getters (`GetAllUsers`, `GetUserById`, `GetUserByEmail`).
+- `RegisterUser(UserRegisterRequest)`:
+  - Valida unicidad de email mediante `_userRepository.GetUserByEmailAsync`.
+  - Crea una entidad `User` con rol `Regular` y persiste con `_userRepository.CreateAsync`.
+  - Crea una wallet por defecto (vía `_walletService.CreateAsync`) si el rol no es `Admin`.
+  - Si la creación de wallet falla, intenta un rollback simple eliminando el usuario creado (`_userRepository.DeleteAsync`) y devuelve `false`.
+- `CreateAdminUser(UserCreateRequest)`:
+  - Similar a `RegisterUser` pero permite crear con rol `Admin` (método público usado por administradores).
+  - También contiene la lógica de wallet (se crea sólo si el rol no es `Admin`) y rollback en fallo.
+- `UpdateUser(Guid id, UserUpdateDataRequest)`:
+  - Recupera el usuario; actualiza solo campos permitidos: `Name`, `Password` y `Active` (si se provee).
+  - Persiste con `_userRepository.UpdateAsync`.
+- `ChangeUserActiveStatus(Guid id)`:
+  - Alterna el flag `Active` y persiste.
+- `DeleteUser(Guid id)`:
+  - Realiza baja lógica: marca `Active = false` y persiste.
+
+Detalles adicionales:
+- `UserServices` usa `IUserRepository` y `IWalletService`.
+- El método auxiliar `GenerateAlias(string name, string email)` genera un alias válido (6-20 caracteres, sólo letras y puntos), normaliza acentos, sustituye espacios por puntos, elimina caracteres inválidos y ajusta longitud. Se usa al crear wallets.
+
+Ubicación:
+- `src/SmartWallet.Application/Services/IUserServices.cs`
+- `src/SmartWallet.Application/Services/UserServices.cs`
 
 ---
 
 ### 3. Controlador de Usuario (`UserController`)
-Expone los endpoints HTTP. Todos los handlers delegan en `IUserServices` y retornan `IActionResult`. El controlador requiere autorización con rol `Admin`.
-
-**Atributos clave:**
+Atributos de la clase:
 - `[Route("api/[controller]")]`
 - `[ApiController]`
-- `[Authorize(Roles = "Admin")]`
+- `[Authorize]` — exige token por defecto; se anulan acciones públicas con `[AllowAnonymous]` y se restringen otras con `[Authorize(Roles = "Admin")]`.
 
-**Endpoints actuales (rutas tal y como están en el código):**
-| Método | Ruta                                 | Descripción                                 | Parámetros / DTOs |
-|--------|--------------------------------------|---------------------------------------------|-------------------|
-| GET    | `/api/User`                          | Listar todos los usuarios                   | —                 |
-| GET    | `/UserById/{userId}`                 | Obtener usuario por ID                      | route: `userId`   |
-| GET    | `/UserByEmail/{email}`               | Obtener usuario por email                   | route: `email`    |
-| POST   | `/RegisterUser`                      | Registro público (crea usuario Regular)     | body: `UserCreateRequest` |
-| POST   | `/CreateUser`                        | Crear usuario (admin)                       | body: `UserCreateRequest` |
-| PUT    | `/api/User/{id}`                     | Actualizar usuario                          | route: `id`, body: `UserUpdateDataRequest` |
-| PUT    | `/ChangeActiveStatus/{id}`           | Alternar estado activo del usuario          | route: `id`       |
-| DELETE | `/api/User` (DELETE con query `id`)  | Eliminar usuario (baja lógica, query param) | query: `id`       |
+Helpers internos:
+- `GetUserIdFromToken()` — extrae claim `sub` o `NameIdentifier` y lo parsea a `Guid?`.
+- `GetUserEmailFromToken()` — extrae claim `email`.
+- `IsAdmin()` — comprueba `User.IsInRole("Admin")` o el claim `"role" == "Admin"` (case-insensitive).
 
-Notas:
-- Las rutas que comienzan con `/` en los atributos del controlador (p. ej. `"/UserById/{userId}"`) son rutas absolutas y no incluyen el prefijo `api/[controller]`.
-- Todas las acciones usan `IUserServices` y la mayoría devuelven códigos estándar: `200 OK`, `204 NoContent` (en diseños alternativos), `400 BadRequest` y `404 NotFound` según resultado.
-- El controlador aplica `[Authorize(Roles = "Admin")]`: solo administradores pueden invocar estas rutas en el despliegue actual. Si algunas rutas deben ser públicas (p. ej. `RegisterUser`), ajustar el atributo `Authorize` o anularlo con `[AllowAnonymous]`.
+Endpoints (rutas y comportamiento exacto según el código actual):
 
-**Ubicación:**  
-`src/SmartWallet.API/Controllers/UserController.cs`
+- GET `/api/User`
+  - Atributos: `[HttpGet]` + `[Authorize(Roles = "Admin")]`
+  - Descripción: Lista todos los usuarios.
+  - Comportamiento: llama `await _userServices.GetAllUsers()` y devuelve `200 OK` con la lista.
+
+- GET `/UserById/{userId}` (ruta absoluta)
+  - Atributo: `[HttpGet("/UserById/{userId}")]`
+  - Autorización: el usuario debe ser Admin o el mismo usuario identificado por el token.
+  - Comportamiento:
+    - Valida autorización comparando `GetUserIdFromToken()` con `userId` o `IsAdmin()`.
+    - Llama `await _userServices.GetUserById(userId)`.
+    - Respuestas: `200 OK` con `UserResponse`, `404 NotFound` si no existe, `403 Forbid` si no está autorizado.
+
+- GET `/UserByEmail/{email}` (ruta absoluta)
+  - Atributo: `[HttpGet("/UserByEmail/{email}")]`
+  - Autorización: Admin o el propio email del token.
+  - Comportamiento similar a GetUserById usando `GetUserEmailFromToken()` y `_userServices.GetUserByEmail(email)`.
+
+- POST `/RegisterUser` (ruta absoluta, público)
+  - Atributos: `[AllowAnonymous]` + `[HttpPost("/RegisterUser")]`
+  - Cuerpo: `UserRegisterRequest`
+  - Comportamiento:
+    - Llama `await _userServices.RegisterUser(request)`.
+    - Respuestas: `200 OK` en éxito, `400 BadRequest` en fallo.
+
+- POST `/CreateUser` (ruta absoluta, admin)
+  - Atributos: `[Authorize(Roles = "Admin")]` + `[HttpPost("/CreateUser")]`
+  - Cuerpo: `UserCreateRequest`
+  - Comportamiento:
+    - Llama `await _userServices.CreateAdminUser(request)`.
+    - Respuestas: `200 OK` en éxito, `400 BadRequest` en fallo.
+
+- PUT `/api/User/{id}`
+  - Atributo: `[HttpPut("{id}")]`
+  - Autorización: solo el propio usuario (se compara `GetUserIdFromToken()` con `id`).
+  - Cuerpo: `UserUpdateDataRequest`
+  - Comportamiento:
+    - Si el token no coincide, devuelve `403 Forbid`.
+    - Llama `await _userServices.UpdateUser(id, request)`.
+    - Respuestas: `200 OK` en éxito, `400 BadRequest` si el servicio devuelve `false`.
+
+- PUT `/ChangeActiveStatus/{id}` (ruta absoluta, admin)
+  - Atributos: `[Authorize(Roles = "Admin")]` + `[HttpPut("/ChangeActiveStatus/{id}")]`
+  - Comportamiento:
+    - Llama `await _userServices.ChangeUserActiveStatus(id)`.
+    - Respuestas: `200 OK` en éxito, `400 BadRequest` en fallo.
+
+- DELETE `/api/User?id={id}`
+  - Atributo: `[HttpDelete]` (usa query param)
+  - Autorización: Admin o propio usuario (se compara `GetUserIdFromToken()` con `id`).
+  - Comportamiento:
+    - Llama `await _userServices.DeleteUser(id)`.
+    - Respuestas: `200 OK` en éxito, `400 BadRequest` en fallo, `403 Forbid` si no autorizado.
+
+Notas sobre respuestas:
+- El controlador actual usa mayormente `Ok()` y `BadRequest()`/`NotFound()`/`Forbid()` según el resultado booleano o la existencia del recurso. No se usa `CreatedAtAction` en la implementación actual (aunque sería apropiado en endpoints de creación).
 
 ---
 
-## Flujo de una operación típica
-
-1. El cliente realiza una petición HTTP al `UserController`.
-2. El controlador valida el modelo (model binding / DataAnnotations) y las credenciales (Authorize).
-3. El controlador llama al método asincrónico del servicio (`IUserServices`).
-4. El servicio aplica la lógica de negocio y usa `IUserRepository` (métodos `*Async`) para persistencia.
-5. El servicio mapea entidades a `Contracts.Responses.UserResponse` y devuelve resultado al controlador.
-6. El controlador construye la respuesta HTTP apropiada.
-
----
-
-## Ejemplos de uso actualizados (firmas y rutas reales)
-
-```csharp
-// Obtener todos los usuarios
-public ActionResult<List<UserResponse>> GetAllUsers()
-{
-    var users = _userServices.GetAllUsers();
-    return Ok(users);
-}
-
-// Obtener un usuario por ID
-public ActionResult<UserResponse> GetUserById(Guid userId)
-{
-    var user = _userServices.GetUserById(userId);
-    if (user == null) return NotFound();
-
-    return Ok(user);
-}
-
-// Obtener un usuario por email
-public ActionResult<UserResponse> GetUserByEmail(string email)
-{
-    var user = _userServices.GetUserByEmail(email);
-    if (user == null) return NotFound();
-
-    return Ok(user);
-}
-
-// Registrar un nuevo usuario (público)
-[HttpPost]
-public IActionResult RegisterUser([FromBody] UserCreateRequest request)
-{
-    if (!ModelState.IsValid) return BadRequest(ModelState);
-
-    _userServices.RegisterUser(request);
-
-    return CreatedAtAction(nameof(GetUserById), new { id = request.Id }, request);
-}
-
-// Crear un nuevo usuario (admin)
-[HttpPost("CreateUser")]
-public IActionResult CreateUser([FromBody] UserCreateRequest request)
-{
-    if (!ModelState.IsValid) return BadRequest(ModelState);
-
-    _userServices.CreateUser(request);
-
-    return CreatedAtAction(nameof(GetUserById), new { id = request.Id }, request);
-}
-
-// Actualizar usuario existente
-[HttpPut("{id}")]
-public IActionResult UpdateUser(Guid id, [FromBody] UserUpdateDataRequest request)
-{
-    if (!ModelState.IsValid) return BadRequest(ModelState);
-
-    var updated = _userServices.UpdateUser(id, request);
-    if (!updated) return NotFound();
-
-    return NoContent();
-}
-
-// Cambiar estado activo de usuario
-[HttpPut("ChangeActiveStatus/{id}")]
-public IActionResult ChangeUserActiveStatus(Guid id)
-{
-    var changed = _userServices.ChangeUserActiveStatus(id);
-    if (!changed) return NotFound();
-
-    return NoContent();
-}
-
-// Eliminar usuario (baja lógica)
-[HttpDelete("{id}")]
-public IActionResult DeleteUser(Guid id)
-{
-    var deleted = _userServices.DeleteUser(id);
-    if (!deleted) return NotFound();
-
-    return NoContent();
-}
+## Resumen del flujo real (según implementación)
+1. Petición HTTP -> `UserController` (autoriza por claims según el endpoint).
+2. Controller extrae claims si necesita autorizar por usuario/email.
+3. Controller llama al `IUserServices` correspondiente (métodos async).
+4. `UserServices` aplica reglas de negocio, valida unicidad, mapea entidades y orquesta creación de wallets.
+5. `UserServices` persiste a través de `IUserRepository`.
+6. Controller traduce el resultado (bool / objeto) a respuesta HTTP (`Ok`, `BadRequest`, `NotFound`, `Forbid`).
