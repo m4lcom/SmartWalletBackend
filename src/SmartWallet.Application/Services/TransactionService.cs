@@ -70,9 +70,10 @@ namespace SmartWallet.Application.Services
 
             var destinationWallet = await _walletRepository.GetByIdAsync(destinationWalletId) ?? throw new KeyNotFoundException("Wallet destino no encontrada.");
             
-            var transaction = sourceWallet.Transfer(destinationWalletId, amount, currency);
-            destinationWallet.Credit(amount, currency);
+            // --- logica de dominio: debitar origen y acreditar destino ---
+            var transaction = sourceWallet.Transfer(destinationWallet, amount, currency);
 
+            // --- persistencia ---
             await _transactionRepository.AddAsync(transaction);
             var ledgers = TransactionLedger.FromTransaction(transaction);
             await _ledgerRepository.AddRangeAsync(ledgers);
