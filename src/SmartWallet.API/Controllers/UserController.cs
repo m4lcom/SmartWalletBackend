@@ -85,7 +85,7 @@ namespace SmartWallet.API.Controllers
 
         [AllowAnonymous] 
         [HttpPost("/RegisterUser")]
-        public async Task<IActionResult> RegisterUser([FromBody] UserCreateRequest request)
+        public async Task<IActionResult> RegisterUser([FromBody] UserRegisterRequest request)
         {
             var result = await _userServices.RegisterUser(request);
             if (!result)
@@ -97,10 +97,9 @@ namespace SmartWallet.API.Controllers
         
         [Authorize(Roles = "Admin")]
         [HttpPost("/CreateUser")]
-        public async Task<IActionResult> CreateUser([FromBody] UserCreateRequest request)
+        public async Task<IActionResult> CreateAdminUser([FromBody] UserCreateRequest request)
         {
-
-            var result = await _userServices.CreateUser(request);
+            var result = await _userServices.CreateAdminUser(request);
             if (!result)
             {
                 return BadRequest();

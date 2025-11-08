@@ -9,8 +9,8 @@ namespace SmartWallet.Application.Services
         public Task<List<UserResponse>> GetAllUsers();
         public Task<UserResponse?> GetUserById(Guid id);
         public Task<UserResponse?> GetUserByEmail(string email);
-        public Task<bool> RegisterUser(UserCreateRequest request);
-        public Task<bool> CreateUser(UserCreateRequest request);
+        public Task<bool> RegisterUser(UserRegisterRequest request);
+        public Task<bool> CreateAdminUser(UserCreateRequest request);
         public Task<bool> UpdateUser(Guid id, UserUpdateDataRequest request);
         public Task<bool> ChangeUserActiveStatus(Guid id);
         public Task<bool> DeleteUser(Guid id);

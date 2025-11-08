@@ -69,7 +69,7 @@ namespace SmartWallet.Application.Services
             };
         }
 
-        public async Task<bool> RegisterUser(UserCreateRequest request)
+        public async Task<bool> RegisterUser(UserRegisterRequest request)
         {
             var existingUser = await _userRepository.GetUserByEmailAsync(request.Email);
             if (existingUser != null)
@@ -106,7 +106,7 @@ namespace SmartWallet.Application.Services
             return true;
         }
 
-        public async Task<bool> CreateUser(UserCreateRequest request)
+        public async Task<bool> CreateAdminUser(UserCreateRequest request)
         {
             var existingUser = await _userRepository.GetUserByEmailAsync(request.Email);
             if (existingUser != null)
@@ -117,7 +117,7 @@ namespace SmartWallet.Application.Services
                 request.Name,
                 request.Email,
                 passwordHash,
-                (SmartWallet.Domain.Enums.UserRole)request.Role,
+                SmartWallet.Domain.Enums.UserRole.Admin,
                 true
             );
 
@@ -152,9 +152,6 @@ namespace SmartWallet.Application.Services
 
             if (!string.IsNullOrWhiteSpace(request.Password))
                 user.ChangePassword(request.Password);
-
-            if (request.Role != null)
-                user.ChangeRole((SmartWallet.Domain.Enums.UserRole)request.Role);
 
             if (request.Active != null)
                 user.SetActive(request.Active.Value);
