@@ -16,7 +16,7 @@ namespace SmartWallet.API.Controllers
             _userServices = userServices;
         }
 
-        [HttpGet()]
+        [HttpGet]
         public async Task<IActionResult> GetAllUsers()
         {
             var users = await _userServices.GetAllUsers();
