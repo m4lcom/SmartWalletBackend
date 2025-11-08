@@ -6,12 +6,13 @@ namespace SmartWallet.Application.Services
 {
     public interface IUserServices
     {
-        public List<UserResponse> GetAllUsers();
-        public UserResponse? GetUserById(Guid id);
-        public UserResponse? GetUserByEmail(string email);
-        public bool CreateUser(UserCreateRequest request);
-        public bool UpdateUser(Guid id, UserUpdateDataRequest request);
-        public bool ChangeUserActiveStatus(Guid id);
-        public bool DeleteUser(Guid id);
+        public Task<List<UserResponse>> GetAllUsers();
+        public Task<UserResponse?> GetUserById(Guid id);
+        public Task<UserResponse?> GetUserByEmail(string email);
+        public Task<bool> RegisterUser(UserCreateRequest request);
+        public Task<bool> CreateUser(UserCreateRequest request);
+        public Task<bool> UpdateUser(Guid id, UserUpdateDataRequest request);
+        public Task<bool> ChangeUserActiveStatus(Guid id);
+        public Task<bool> DeleteUser(Guid id);
     }
 }

@@ -1,89 +1,89 @@
-# Changelog � SmartWallet
+﻿# Changelog – SmartWallet
 
 ---
 
 ## 2025-08-22
 ### model project-changelog
-Este archivo registra, en orden cronol�gico, los cambios relevantes del proyecto.  
+Este archivo registra, en orden cronológico, los cambios relevantes del proyecto.  
 Cada entrada debe incluir:
 
 - Fecha en formato: `YYYY-MM-DD` 
-- Descripci�n breve  
+- Descripción breve  
 - Enlace a documentacion tecnica, si lo requiere: 
 
 ---
 
 ## 2025-08-22
 ### setup/project-initialization
-- Instalaci�n de paquetes b�sicos.
-- Creaci�n del proyecto **SmartWallet** con estructura base de soluci�n y proyectos.
+- Instalación de paquetes básicos.
+- Creación del proyecto **SmartWallet** con estructura base de solución y proyectos.
 
-- [Documentaci�n de setup](00-setup.md)  
-- [Documentaci�n de arquitectura](01-architecture.md)
+- [Documentación de setup](00-setup.md)  
+- [Documentación de arquitectura](01-architecture.md)
 
 ---
 
 ## 2025-08-31
 ### config/project-structure-and-config-environment
-- Regeneraci�n de `SmartWalletBackend.sln` con rutas f�sicas correctas.
-- Inclusi�n de archivos ra�z como Solution Items: `.env`, `.gitignore`, `README.md`.
-- Incorporaci�n de todos los archivos de `/docs/` como Solution Items bajo la carpeta l�gica `docs`.
-- Eliminaci�n de referencias fantasma y sincronizaci�n entre estructura f�sica y l�gica.
-- Ajuste de `launchSettings.json` para abrir Swagger autom�ticamente.
-- Implementaci�n de carga autom�tica de `.env` usando `Env.TraversePath().Load()` para evitar rutas relativas fr�giles.
-- Validaci�n de variables cr�ticas (`JWT_SECRET`, `DB_PATH`) antes de iniciar la aplicaci�n.
-- Actualizaci�n de `.env` con claves y rutas necesarias para la ejecuci�n local.
-- Refactor de `appsettings.json` para usar variables de entorno y configuraci�n modular.
-- Limpieza y alineaci�n de configuraci�n entre `.env` y `appsettings.json` para mayor portabilidad y reproducibilidad.
+- Regeneración de `SmartWalletBackend.sln` con rutas físicas correctas.
+- Inclusión de archivos raíz como Solution Items: `.env`, `.gitignore`, `README.md`.
+- Incorporación de todos los archivos de `/docs/` como Solution Items bajo la carpeta lógica `docs`.
+- Eliminación de referencias fantasma y sincronización entre estructura física y lógica.
+- Ajuste de `launchSettings.json` para abrir Swagger automáticamente.
+- Implementación de carga automática de `.env` usando `Env.TraversePath().Load()` para evitar rutas relativas frágiles.
+- Validación de variables críticas (`JWT_SECRET`, `DB_PATH`) antes de iniciar la aplicación.
+- Actualización de `.env` con claves y rutas necesarias para la ejecución local.
+- Refactor de `appsettings.json` para usar variables de entorno y configuración modular.
+- Limpieza y alineación de configuración entre `.env` y `appsettings.json` para mayor portabilidad y reproducibilidad.
 
-- [Convenciones de documentaci�n y Solution Items](conventions.md)  
-- [Configuraci�n de entorno y variables](environment.md)  
+- [Convenciones de documentación y Solution Items](conventions.md)  
+- [Configuración de entorno y variables](environment.md)  
 
 ---
 
 ## 2025-09-08
 ### feature/domain-base-models
-Implementar la capa de dominio de SmartWallet con validaciones b�sicas usando DataAnnotations, sin introducir dependencias de infraestructura.
+Implementar la capa de dominio de SmartWallet con validaciones básicas usando DataAnnotations, sin introducir dependencias de infraestructura.
 - Creacion `Domain/Entities/User.cs`  
-   - A�adido `[Key]`, `[Required]`, `[StringLength]` y `[EmailAddress]` a propiedades  
-   - Relaci�n 1:1 con `Wallet`  
+   - Añadido `[Key]`, `[Required]`, `[StringLength]` y `[EmailAddress]` a propiedades  
+   - Relación 1:1 con `Wallet`  
 - Creacion `Domain/Entities/Wallet.cs`  
    - Validaciones para `Name`, `CurrencyCode`, `Alias`, `Balance`, `CreatedAt`  
    - Usar `[Column(TypeName = "decimal(18,2)")]` para `Balance`  
 - Creacion `Domain/Entities/Transaction.cs`  
-   - Validar `Amount` con `[Range(0.01, double.MaxValue)]` y precisi�n decimal.
+   - Validar `Amount` con `[Range(0.01, double.MaxValue)]` y precisión decimal.
 
 ---
 
 ## 2025-09-08
 ### agregado de documentacion feature/domain-base-models
-- Documentaci�n de la feature **domain-base-model** en `/docs/02-domain-base-model.md`:
+- Documentación de la feature **domain-base-model** en `/docs/02-domain-base-model.md`:
   - Objetivo de la feature y alcance.
-  - Pasos de implementaci�n con detalle de cambios en `User`, `Wallet` y `Transaction`.
+  - Pasos de implementación con detalle de cambios en `User`, `Wallet` y `Transaction`.
   - Cambios previstos en base de datos.
-  - Ejemplos de uso en c�digo.
+  - Ejemplos de uso en código.
 
 ---
 
 ## 2025-09-23
 ### feature/domain-transaction-ledger-and-status
-Implementaci�n de TransactionLedger, enums de TransactionType, TransactionStatus y CurrencyCode, junto con m�todos de dominio para control de estados.
-- Creaci�n de Domain/Entities/TransactionLedger.cs
+Implementación de TransactionLedger, enums de TransactionType, TransactionStatus y CurrencyCode, junto con métodos de dominio para control de estados.
+- Creación de Domain/Entities/TransactionLedger.cs
 	- Registro auditable de operaciones con Timestamp, Type, Amount, CurrencyCode, SourceWalletId, DestinationWalletId, SourceTransactionId, DestinationTransactionId, Status y Metadata.
-	- M�todos de f�brica:
+	- Métodos de fábrica:
 		- CreateDeposit
 		- CreateWithdrawal
 		- CreateTransfer
-	- M�todos de dominio con validaciones de transici�n:
+	- Métodos de dominio con validaciones de transición:
 		- MarkAsPending()
 		- MarkAsCompleted()
 		- MarkAsFailed()
 		- MarkAsCanceled()
-- Actualizaci�n de `TransactionType` en `SmartWallet.Domain.Enums`:
+- Actualización de `TransactionType` en `SmartWallet.Domain.Enums`:
 	- Deposit = 0
 	- Withdrawal = 1
 	- Transfer = 2
-- Actualizaci�n de `TransactionStatus` en `SmartWallet.Domain.Enums`:
+- Actualización de `TransactionStatus` en `SmartWallet.Domain.Enums`:
 	- Pending = 0
 	- Completed = 1
 	- Failed = 2
@@ -95,12 +95,12 @@ Implementaci�n de TransactionLedger, enums de TransactionType, TransactionStatus
 
 ## 2025-09-30
 ### feature/dbcontext-setup
-- Creaci�n de `SmartWalletDbContext` en `Infrastructure.Persistence.Context`.
+- Creación de `SmartWalletDbContext` en `Infrastructure.Persistence.Context`.
 - Constructor con `DbContextOptions`.
-- M�todo `OnModelCreating` presente, preparado para configuraci�n de relaciones.
-- Inclusi�n de `DbSet` comentados para que el equipo agregue sus entidades.
-- Registro del contexto en `Program.cs` usando `UseSqlite` y cadena de conexi�n desde `.env`.
-- Validaci�n de variables cr�ticas (`JWT_SECRET`, `DB_PATH`) antes de iniciar la aplicaci�n.
+- Método `OnModelCreating` presente, preparado para configuración de relaciones.
+- Inclusión de `DbSet` comentados para que el equipo agregue sus entidades.
+- Registro del contexto en `Program.cs` usando `UseSqlite` y cadena de conexión desde `.env`.
+- Validación de variables críticas (`JWT_SECRET`, `DB_PATH`) antes de iniciar la aplicación.
 
 - [Configuracion de db context ](03-dbcontext-setup.md)
 
@@ -108,33 +108,183 @@ Implementaci�n de TransactionLedger, enums de TransactionType, TransactionStatus
 
 ## 2025-10-07
 ### feature/transaction-ledger-vertical-implementation
-Implementaci�n completa de la vertical `Transaction` y `TransactionLedger`, incluyendo entidades, repositorios, servicio de aplicaci�n y endpoints de API.
+Implementación completa de la vertical `Transaction` y `TransactionLedger`, incluyendo entidades, repositorios, servicio de aplicación y endpoints de API.
 
-- Creaci�n de `Domain/Entities/Transaction.cs` con propiedades: `Id`, `WalletId`, `Type`, `Amount`, `CurrencyCode`, `Status`, `Date`.
-- Creaci�n de `Domain/Entities/TransactionLedger.cs` con propiedades: `Id`, `TransactionId`, `SourceWalletId`, `DestinationWalletId`, `Amount`, `Date`.
+- Creación de `Domain/Entities/Transaction.cs` con propiedades: `Id`, `WalletId`, `Type`, `Amount`, `CurrencyCode`, `Status`, `Date`.
+- Creación de `Domain/Entities/TransactionLedger.cs` con propiedades: `Id`, `TransactionId`, `SourceWalletId`, `DestinationWalletId`, `Amount`, `Date`.
 - Registro de enums `TransactionType`, `TransactionStatus`, `CurrencyCode` en `SmartWallet.Domain.Enums`.
-- Implementaci�n de `TransactionService` con m�todos:
+- Implementación de `TransactionService` con métodos:
   - `DepositAsync`
   - `WithdrawAsync`
   - `TransferAsync`
-- Definici�n de la interfaz `ITransactionService` y registro en `Program.cs`.
-- Implementaci�n de `TransactionRepository` y `TransactionLedgerRepository` en `Infrastructure.Persistence.Repositories`.
+- Definición de la interfaz `ITransactionService` y registro en `Program.cs`.
+- Implementación de `TransactionRepository` y `TransactionLedgerRepository` en `Infrastructure.Persistence.Repositories`.
 - Registro de ambos repositorios en el contenedor de dependencias.
-- Definici�n de endpoints en `TransactionsController`:
+- Definición de endpoints en `TransactionsController`:
   - `POST /api/transactions/deposit`
   - `POST /api/transactions/withdraw`
   - `POST /api/transactions/transfer`
-- Testeo de endpoints v�a Postman con valores v�lidos (`CurrencyCode = 32`).
-- Resoluci�n de errores 405 y 400 relacionados con registro de servicios y validaci�n de enums.
-- Documentaci�n t�cnica de la verticalidad y flujo de orquestaci�n entre entidades.
-- Pendiente: integraci�n con `WalletRepository` para validaci�n de saldo y actualizaci�n de balance.
+- Testeo de endpoints vía Postman con valores válidos (`CurrencyCode = 32`).
+- Resolución de errores 405 y 400 relacionados con registro de servicios y validación de enums.
+- Documentación técnica de la verticalidad y flujo de orquestación entre entidades.
+- Pendiente: integración con `WalletRepository` para validación de saldo y actualización de balance.
 
-- [Documentaci�n de verticalidad Transaction + Ledger](docs/07-transaction-ledger-vertical.md)
+- [Documentación de verticalidad Transaction + Ledger](docs/07-transaction-ledger-vertical.md)
 
 ---
 
 ## 2025-10-10
 ### feature/user-management
-- Documentaci�n completa de la arquitectura de gesti�n de usuarios en `08-user-management.md`.
-- Implementaci�n de `UserRepository` con m�todo `GetUserByID`.
-- Integraci�n de repositorio, servicio y controlador para operaciones CRUD de usuario.
+- Documentación completa de la arquitectura de gestión de usuarios en `08-user-management.md`.
+- Implementación de `UserRepository` con método `GetUserByID`.
+- Integración de repositorio, servicio y controlador para operaciones CRUD de usuario.
+
+---
+
+## 2025-10-18 
+### feature/add-authentication-and-authorization-jwt
+
+### Commit
+- `feat: add authentication and authorization with JWT`
+
+### Descripción
+Se implementó el sistema de autenticación y autorización basado en **JWT**.  
+Incluye emisión de tokens en el login, protección de endpoints con `[Authorize]` y restricción de acceso por roles (`User`, `Admin`).
+
+### Cambios principales
+- **Program.cs**
+  - Configuración de `AddAuthentication` con esquema `JwtBearer`.
+  - Configuración de `AddAuthorization` con soporte para roles.
+  - Swagger configurado con esquema Bearer.
+- **Controllers**
+  - `AuthController`: agregado endpoint `/login` (público).
+  - `TransactionsController`: protegido con `[Authorize]`, endpoints críticos restringidos a `Admin`.
+  - `TransactionLedgersController`: protegido con `[Authorize]`.
+  - `UserController`: protegido con `[Authorize(Roles="Admin")]`.
+- **Services**
+  - `AuthenticationService`: validación de credenciales y generación de tokens JWT.
+- **Infraestructura**
+  - `UserRepository`: soporte para validación de usuarios.
+- **Contratos**
+  - `LoginRequest`, `UserCreateRequest`.
+
+### Migraciones
+- `202510182100_add_auth_tables`
+  - Tabla `Users` actualizada con campos `Id`, `Email`, `PasswordHash`, `Role`, `Active`.
+  - Preparado soporte para roles.
+
+### Endpoints
+| Método | Ruta                | Descripción                       | Autenticación |
+|--------|---------------------|-----------------------------------|---------------|
+| POST   | /api/auth/login     | Login y emisión de token JWT      | ❌ |
+| GET    | /api/users/me       | Datos del usuario autenticado     | ✅ |
+| POST   | /api/users          | Crear usuario                     | ✅ (Admin) |
+| GET    | /api/transactions   | Consultar transacciones           | ✅ |
+| POST   | /api/transactions   | Crear transacción                 | ✅ |
+| PATCH  | /api/transactions/{id}/fail | Marcar transacción como fallida | ✅ (Admin) |
+
+- [Documentación de Authentication](docs/05-authentication.md)
+
+---
+
+## 2025-10-18
+### refactor/service-collection-extensions
+
+### Objetivo
+Separar la configuración de servicios y autenticación de `Program.cs` en métodos de extensión sobre `IServiceCollection`.  
+Esto mejora la legibilidad, modularidad y mantenibilidad del proyecto.
+
+### Pasos de implementación
+1. **Cambios clave en código**
+   - Creación de `ServiceCollectionExtensions` en `Infrastructure/Extensions`.
+   - Se movió el registro de repositorios, servicios de aplicación y `DbContext` a `AddSmartWalletInfrastructure`.
+   - Se movió la configuración de autenticación JWT a `AddJwtAuthentication`.
+   - `Program.cs` reducido a configuración de entorno, orquestación de servicios y pipeline.
+
+2. **Archivos creados/modificados**
+   - `Infrastructure/Extensions/ServiceCollectionExtensions.cs`
+   - `Program.cs` (simplificado)
+
+3. **Dependencias o paquetes añadidos**
+   - Ninguna nueva (se reutilizan las ya existentes: `Microsoft.AspNetCore.Authentication.JwtBearer`, `Microsoft.EntityFrameworkCore.Sqlite`).
+
+### Notas adicionales
+- Se resolvió la ambigüedad entre `IAuthenticationService` de ASP.NET Core y el definido en la aplicación mediante alias en `ServiceCollectionExtensions`.
+- `Program.cs` ahora contiene únicamente:
+  - Carga y validación de variables de entorno.
+  - Configuración mínima (`Jwt:Key`, `ConnectionStrings`).
+  - Registro de servicios vía extensiones.
+  - Pipeline de middleware (`Swagger`, `HttpsRedirection`, `Authentication`, `Authorization`, `Controllers`).
+
+---
+
+## 2025-10-21
+### feature/wallet-management
+
+### Objetivo
+Implementación completa de la entidad `Wallet`, repositorio, servicio de aplicación y endpoints de API para la gestión de billeteras de usuario en SmartWallet.
+
+### Cambios principales
+
+- **Domain**
+  - `Domain/Entities/Wallet.cs`
+    - Propiedades: `Id`, `UserID`, `Name`, `CurrencyCode`, `Alias`, `Balance`, `CreatedAt`
+    - Navegaciones: `SourceLedgers`, `DestinationLedgers`, `ReceivedTransfers`
+    - Validaciones con DataAnnotations (`[Required]`, `[StringLength]`, `[Range]`, `[Column(TypeName="decimal(18,2)")]`, `[RegularExpression]`)
+    - Métodos de dominio:
+      - `Deposit(decimal amount, CurrencyCode currency)`
+      - `Withdrawal(decimal amount, CurrencyCode currency)`
+      - `Transfer(Guid destinationWalletId, decimal amount, CurrencyCode currency)`
+    - Métodos internos de invariantes: `Credit`, `Debit`
+
+- **Enums**
+  - `Domain/Enums/CurrencyCode.cs`
+    - ARS = 32
+    - USD = 840
+    - EUR = 978
+    - BRL = 986
+
+- **Application**
+  - `Application/Services/IWalletService.cs`
+    - Métodos: `GetByIdAsync`, `ExistsAsync`, `AddAsync`, `UpdateAsync`, `CreateAsync`
+  - Definición de la capa de aplicación desacoplada del repositorio
+
+- **Infrastructure**
+  - `Infrastructure/Persistence/Repositories/WalletRepository.cs`
+    - Implementación de `IWalletRepository`
+    - Métodos: `GetByIdAsync`, `ExistsAsync`, `AddAsync`, `UpdateAsync`
+    - Pendiente: `GetByAliasAsync`
+  - `Infrastructure/SmartWalletDbContext.cs`
+    - DbSet<Wallet>
+    - Configuración de relaciones y precisión decimal en OnModelCreating
+
+- **Endpoints / API**
+  - Pendiente: integración de Wallet con Transacciones y validación de saldo
+  - Preparación para la exposición de endpoints REST para CRUD de Wallet
+
+### Documentación
+- [Documentación de Wallet](docs/09-wallet.md)
+## 2025-10-24 — docs: documentación y changelog para HttpClient y Polly (DolarApi)
+- Tipo: `docs`
+- Descripción: Se añade documentación técnica que explica la integración de `HttpClient` con políticas de resiliencia de `Polly` para el servicio `DolarApi`. Incluye ejemplos de `appsettings.json`, explicación de `ApiClientConfiguration`, `DolarApiOptions`, y la extensión de registro de servicios `AddDolarApi`.
+- Archivos añadidos/actualizados:
+  - `docs/httpclient-polly.md` (nuevo)
+  - `docs/changelog.md` (actualizado)
+- Notas de migración:
+  - Asegúrate de incluir los nuevos archivos en la solución como Solution Items en __Solution Explorer__ bajo la carpeta `docs`.
+  - Commit recomendado: `docs: add httpclient + polly docs for DolarApi`
+
+---
+
+## 2025-11-02 — refactor: UsersAsync
+- Actualizado: `docs/08-user-management.md`
+  - Refleja la implementación real de repositorios (`*Async`), servicios (`IUserServices` / `UserServices`) y rutas del controlador `UserController`.
+  - Documentadas las rutas absolutas presentes en el controlador (`/UserById/{userId}`, `/UserByEmail/{email}`, `/RegisterUser`, `/CreateUser`, `/ChangeActiveStatus/{id}`) y la ruta base `api/User`.
+  - Aclarado que el controlador aplica `[Authorize(Roles = "Admin")]`.
+  - Especificado comportamiento de `RegisterUser`, `CreateUser`, `UpdateUser`, `ChangeUserActiveStatus` y `DeleteUser` (baja lógica).
+- Archivos revisados (implementación actual):
+  - `src/SmartWallet.API/Controllers/UserController.cs`
+  - `src/SmartWallet.Application/Services/UserServices.cs`
+  - `src/SmartWallet.Application/Services/IUserServices.cs`
+  - `src/SmartWallet.Application/Abstractions/IUserRepository.cs`
+  - `src/SmartWallet.Infrastructure/Persistence/Repositories/UserRepository.cs`

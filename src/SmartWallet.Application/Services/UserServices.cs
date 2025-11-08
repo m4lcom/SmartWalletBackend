@@ -13,12 +13,12 @@ namespace SmartWallet.Application.Services
         {
             _userRepository = userRepository;
         }
-        public List<UserResponse> GetAllUsers()
+        public async Task<List<UserResponse>> GetAllUsers()
         {
-            var users = _userRepository.GetAll();
+            var users = await _userRepository.GetAllAsync();
             var userResponses = users.Select(user => new UserResponse
             {
-                UserID = user.UserID,
+                Id = user.Id,
                 Name = user.Name,
                 Email = user.Email,
                 Role = (UserRole)user.Role,
@@ -29,13 +29,13 @@ namespace SmartWallet.Application.Services
             return userResponses;
         }
 
-        public UserResponse? GetUserById(Guid id)
+        public async Task<UserResponse?> GetUserById(Guid id)
         {
-            var user = _userRepository.GetById(id);
+            var user = await _userRepository.GetByIdAsync(id);
             if (user == null) return null;
             return new UserResponse
             {
-                UserID = user.UserID,
+                Id = user.Id,
                 Name = user.Name,
                 Email = user.Email,
                 Role = (UserRole)user.Role,
@@ -45,13 +45,13 @@ namespace SmartWallet.Application.Services
             };
         }
 
-        public UserResponse? GetUserByEmail(string email)
+        public async Task<UserResponse?> GetUserByEmail(string email)
         {
-            var user = _userRepository.GetUserByEmail(email);
+            var user = await _userRepository.GetUserByEmailAsync(email);
             if (user == null) return null;
             return new UserResponse
             {
-                UserID = user.UserID,
+                Id = user.Id,
                 Name = user.Name,
                 Email = user.Email,
                 Role = (UserRole)user.Role,
@@ -60,10 +60,26 @@ namespace SmartWallet.Application.Services
                 Active = user.Active
             };
         }
-
-        public bool CreateUser (UserCreateRequest request)
+        public async Task<bool> RegisterUser(UserCreateRequest request)
         {
-            var existingUser = _userRepository.GetUserByEmail(request.Email);
+            var existingUser = await _userRepository.GetUserByEmailAsync(request.Email);
+            if (existingUser != null)
+                return false;
+            var passwordHash = request.Password;
+            var newUser = new Domain.Entities.User(
+                request.Name,
+                request.Email,
+                passwordHash,
+                role: Domain.Enums.UserRole.Regular,
+                true
+            );
+            await _userRepository.CreateAsync(newUser);
+            return true;
+        }
+
+        public async Task<bool> CreateUser (UserCreateRequest request)
+        {
+            var existingUser = await _userRepository.GetUserByEmailAsync(request.Email);
             if (existingUser != null) 
                 return false;
             var passwordHash = request.Password;
@@ -74,13 +90,13 @@ namespace SmartWallet.Application.Services
                 (Domain.Enums.UserRole)request.Role,
                 true
             );
-            _userRepository.Create(newUser);
+            await _userRepository.CreateAsync(newUser);
             return true;
         }
 
-        public bool UpdateUser(Guid id, UserUpdateDataRequest request)
+        public async Task<bool> UpdateUser(Guid id, UserUpdateDataRequest request)
         {
-            var user = _userRepository.GetById(id);
+            var user = await _userRepository.GetByIdAsync(id);
 
             if (user == null)
                 return false;
@@ -100,30 +116,30 @@ namespace SmartWallet.Application.Services
             if(request.Active != null)
                 user.SetActive(request.Active.Value);
 
-            _userRepository.Update(user);
+            await _userRepository.UpdateAsync(user);
             return true;
         }
 
-        public bool ChangeUserActiveStatus(Guid id)
+        public async Task<bool> ChangeUserActiveStatus(Guid id)
         {
-            var user = _userRepository.GetById(id);
+            var user = await _userRepository.GetByIdAsync(id);
 
             if (user == null)
                 return false;
             user.SetActive(!user.Active);
-            _userRepository.Update(user);
+            await _userRepository.UpdateAsync(user);
             return true;
         }
 
-        public bool DeleteUser(Guid id)
+        public async Task<bool> DeleteUser(Guid id)
         {
-            var user = _userRepository.GetById(id);
+            var user = await _userRepository.GetByIdAsync(id);
 
             if (user == null) 
                 return false;
             user.SetActive(false);
 
-            _userRepository.Update(user);
+            await _userRepository.UpdateAsync(user);
             return true;
         }
 
