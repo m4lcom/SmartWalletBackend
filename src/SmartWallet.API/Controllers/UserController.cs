@@ -45,6 +45,7 @@ namespace SmartWallet.API.Controllers
         }
 
         [HttpPost("/RegisterUser")]
+        [AllowAnonymous]
         public async Task<IActionResult> RegisterUser([FromBody] UserCreateRequest request)
         {
             var result = await _userServices.RegisterUser(request);
