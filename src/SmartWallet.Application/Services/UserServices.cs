@@ -117,7 +117,7 @@ namespace SmartWallet.Application.Services
                 request.Name,
                 request.Email,
                 passwordHash,
-                SmartWallet.Domain.Enums.UserRole.Admin,
+                (Domain.Enums.UserRole)request.Role,
                 true
             );
 

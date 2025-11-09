@@ -411,30 +411,9 @@
             "description": "Success"
           }
         }
-      },
-      "delete": {
-        "tags": [
-          "User"
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "query",
-            "style": "form",
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Success"
-          }
-        }
       }
     },
-    "/UserById/{userId}": {
+    "/api/User/{userId}": {
       "get": {
         "tags": [
           "User"
@@ -458,7 +437,7 @@
         }
       }
     },
-    "/UserByEmail/{email}": {
+    "/api/User/by-email/{email}": {
       "get": {
         "tags": [
           "User"
@@ -481,7 +460,7 @@
         }
       }
     },
-    "/RegisterUser": {
+    "/api/User/register": {
       "post": {
         "tags": [
           "User"
@@ -512,7 +491,7 @@
         }
       }
     },
-    "/CreateUser": {
+    "/api/User/create": {
       "post": {
         "tags": [
           "User"
@@ -584,9 +563,31 @@
             "description": "Success"
           }
         }
+      },
+      "delete": {
+        "tags": [
+          "User"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "style": "simple",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
       }
     },
-    "/ChangeActiveStatus/{id}": {
+    "/api/User/{id}/active": {
       "put": {
         "tags": [
           "User"
