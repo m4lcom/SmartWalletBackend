@@ -96,78 +96,83 @@ Ubicación:
 Atributos de la clase:
 - `[Route("api/[controller]")]`
 - `[ApiController]`
-- `[Authorize]` — exige token por defecto; se anulan acciones públicas con `[AllowAnonymous]` y se restringen otras con `[Authorize(Roles = "Admin")]`.
+- `[Authorize]` — exige token por defecto; se anulan acciones públicas con `[AllowAnonymous]` y se restringen acciones administrativas con `[Authorize(Roles = "Admin")]`.
 
-Helpers internos:
-- `GetUserIdFromToken()` — extrae claim `sub` o `NameIdentifier` y lo parsea a `Guid?`.
-- `GetUserEmailFromToken()` — extrae claim `email`.
-- `IsAdmin()` — comprueba `User.IsInRole("Admin")` o el claim `"role" == "Admin"` (case-insensitive).
+Nota importante: la implementación actual del controlador usa políticas de autorización (`SameUserOrAdmin`) para permitir que un usuario acceda a sus propios recursos o que un Admin tenga acceso; la lógica de comparación de claims (usuario vs recurso) se desplaza a la política, por lo que no hay helpers explícitos para extraer `sub`/`email` dentro del controlador.
 
-Endpoints (rutas y comportamiento exacto según el código actual):
+Endpoints (rutas y comportamiento según el código actual):
 
-- GET `/api/User`
+- GET `GET /api/User`
   - Atributos: `[HttpGet]` + `[Authorize(Roles = "Admin")]`
   - Descripción: Lista todos los usuarios.
   - Comportamiento: llama `await _userServices.GetAllUsers()` y devuelve `200 OK` con la lista.
 
-- GET `/UserById/{userId}` (ruta absoluta)
-  - Atributo: `[HttpGet("/UserById/{userId}")]`
-  - Autorización: el usuario debe ser Admin o el mismo usuario identificado por el token.
+- GET `GET /api/User/{userId}` (route relative)
+  - Atributos: `[HttpGet("{userId:guid}")]` + `[Authorize(Policy = "SameUserOrAdmin")]`
+  - Autorización: la política `SameUserOrAdmin` autoriza si el usuario es Admin o si el `sub` del token coincide con `userId`.
   - Comportamiento:
-    - Valida autorización comparando `GetUserIdFromToken()` con `userId` o `IsAdmin()`.
     - Llama `await _userServices.GetUserById(userId)`.
-    - Respuestas: `200 OK` con `UserResponse`, `404 NotFound` si no existe, `403 Forbid` si no está autorizado.
+    - Respuestas: `200 OK` con `UserResponse`, `404 NotFound` si no existe.
+    - La política de autorización se encarga de devolver `403 Forbid` cuando corresponde.
 
-- GET `/UserByEmail/{email}` (ruta absoluta)
-  - Atributo: `[HttpGet("/UserByEmail/{email}")]`
-  - Autorización: Admin o el propio email del token.
-  - Comportamiento similar a GetUserById usando `GetUserEmailFromToken()` y `_userServices.GetUserByEmail(email)`.
+- GET `GET /api/User/by-email/{email}`
+  - Atributos: `[HttpGet("by-email/{email}")]` + `[Authorize(Policy = "SameUserOrAdmin")]`
+  - Autorización: la política permite acceso si el usuario es Admin o si el claim `email` del token coincide con el parámetro.
+  - Comportamiento: similar a GetUserById usando `_userServices.GetUserByEmail(email)`. Respuestas: `200 OK` / `404 NotFound`.
 
-- POST `/RegisterUser` (ruta absoluta, público)
-  - Atributos: `[AllowAnonymous]` + `[HttpPost("/RegisterUser")]`
+- POST `POST /api/User/register` (público)
+  - Atributos: `[AllowAnonymous]` + `[HttpPost("register")]`
   - Cuerpo: `UserRegisterRequest`
   - Comportamiento:
     - Llama `await _userServices.RegisterUser(request)`.
     - Respuestas: `200 OK` en éxito, `400 BadRequest` en fallo.
 
-- POST `/CreateUser` (ruta absoluta, admin)
-  - Atributos: `[Authorize(Roles = "Admin")]` + `[HttpPost("/CreateUser")]`
+- POST `POST /api/User/create` (admin)
+  - Atributos: `[Authorize(Roles = "Admin")]` + `[HttpPost("create")]`
   - Cuerpo: `UserCreateRequest`
   - Comportamiento:
-    - Llama `await _userServices.CreateAdminUser(request)`.
+    - Llama `await _userServices.CreateAdminUser(request)` (método concreto en la implementación).
     - Respuestas: `200 OK` en éxito, `400 BadRequest` en fallo.
 
-- PUT `/api/User/{id}`
-  - Atributo: `[HttpPut("{id}")]`
-  - Autorización: solo el propio usuario (se compara `GetUserIdFromToken()` con `id`).
+- PUT `PUT /api/User/{id}` (propietario o admin)
+  - Atributos: `[HttpPut("{id:guid}")]` + `[Authorize(Policy = "SameUserOrAdmin")]`
   - Cuerpo: `UserUpdateDataRequest`
   - Comportamiento:
-    - Si el token no coincide, devuelve `403 Forbid`.
     - Llama `await _userServices.UpdateUser(id, request)`.
     - Respuestas: `200 OK` en éxito, `400 BadRequest` si el servicio devuelve `false`.
 
-- PUT `/ChangeActiveStatus/{id}` (ruta absoluta, admin)
-  - Atributos: `[Authorize(Roles = "Admin")]` + `[HttpPut("/ChangeActiveStatus/{id}")]`
+- PUT `PUT /api/User/{id}/active` (admin)
+  - Atributos: `[HttpPut("{id:guid}/active")]` + `[Authorize(Roles = "Admin")]`
   - Comportamiento:
     - Llama `await _userServices.ChangeUserActiveStatus(id)`.
     - Respuestas: `200 OK` en éxito, `400 BadRequest` en fallo.
 
-- DELETE `/api/User?id={id}`
-  - Atributo: `[HttpDelete]` (usa query param)
-  - Autorización: Admin o propio usuario (se compara `GetUserIdFromToken()` con `id`).
+- DELETE `DELETE /api/User/{id}` (propietario o admin)
+  - Atributos: `[HttpDelete("{id:guid}")]` + `[Authorize(Policy = "SameUserOrAdmin")]`
   - Comportamiento:
     - Llama `await _userServices.DeleteUser(id)`.
-    - Respuestas: `200 OK` en éxito, `400 BadRequest` en fallo, `403 Forbid` si no autorizado.
+    - Respuestas: `200 OK` en éxito, `400 BadRequest` en fallo.
+    - La política controla `403 Forbid` cuando el solicitante no está autorizado.
 
 Notas sobre respuestas:
-- El controlador actual usa mayormente `Ok()` y `BadRequest()`/`NotFound()`/`Forbid()` según el resultado booleano o la existencia del recurso. No se usa `CreatedAtAction` en la implementación actual (aunque sería apropiado en endpoints de creación).
+- El controlador actualmente usa `Ok()`, `BadRequest()` y `NotFound()` en sus métodos; las denegaciones por autorización dependen de la infraestructura de políticas (`403 Forbid`) aplicada por ASP.NET Core.
+- No se usan `CreatedAtAction` en los endpoints de creación en la implementación actual; las respuestas exitosas devuelven `200 OK`.
 
 ---
 
 ## Resumen del flujo real (según implementación)
-1. Petición HTTP -> `UserController` (autoriza por claims según el endpoint).
-2. Controller extrae claims si necesita autorizar por usuario/email.
-3. Controller llama al `IUserServices` correspondiente (métodos async).
-4. `UserServices` aplica reglas de negocio, valida unicidad, mapea entidades y orquesta creación de wallets.
-5. `UserServices` persiste a través de `IUserRepository`.
-6. Controller traduce el resultado (bool / objeto) a respuesta HTTP (`Ok`, `BadRequest`, `NotFound`, `Forbid`).
+1. Petición HTTP -> `UserController` (autoriza por atributos y políticas).
+2. Controller delega a `IUserServices` para la lógica de negocio.
+3. `UserServices` aplica reglas de negocio, valida unicidad, mapea entidades y orquesta creación de wallets.
+4. `UserServices` persiste a través de `IUserRepository`.
+5. Controller traduce el resultado (bool / objeto) a respuesta HTTP (`Ok`, `BadRequest`, `NotFound`), y la infraestructura de autorización devuelve `403` cuando aplica.
+
+---
+
+## Cambios principales respecto a la documentación previa
+- Rutas: se unifican como rutas relativas bajo `api/User` en lugar de rutas absolutas fuera del prefijo (p. ej. ya no hay `/UserById/{id}` ni `/RegisterUser` directas; ahora son `api/User/{id}` y `api/User/register`).
+- Autorización: se utiliza la política `SameUserOrAdmin` para endpoints que permiten acceso al propio usuario o a administradores, en lugar de lógica manual de extracción de claims dentro del controlador.
+- Nombres de endpoints: las rutas y nombres han sido normalizados a `register`, `create`, `by-email/{email}`, `{id}`, `{id}/active`.
+- Creación por administrador: el servicio expone `CreateAdminUser` en la implementación concreta y el controlador lo llama desde `POST api/User/create`.
+- Eliminación: ahora `DELETE` usa parámetro de ruta `{id}` en lugar de query string `?id=`.
+- Respuestas: se mantiene el patrón simple de `Ok`/`BadRequest`/`NotFound`; el comportamiento de `403` queda delegado a las políticas/autorización.
