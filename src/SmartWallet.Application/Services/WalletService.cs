@@ -1,6 +1,9 @@
 ﻿using SmartWallet.Application.Abstractions.Persistence;
 using SmartWallet.Domain.Entities;
 using SmartWallet.Domain.Enums;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace SmartWallet.Application.Services
 {
@@ -13,6 +16,21 @@ namespace SmartWallet.Application.Services
             _repository = repository;
         }
 
+        public async Task<List<Wallet>> GetAllAsync()
+        {
+            return await _repository.GetAllAsync();
+        }
+
+        public async Task<List<Wallet>> GetByUserIdAsync(Guid userId)
+        {
+            return await _repository.GetByUserIdAsync(userId);
+        }
+
+        public async Task<Wallet?> GetByAliasAsync(string alias)
+        {
+            return await _repository.GetByAliasAsync(alias);
+        }
+
         public Task<Wallet?> GetByIdAsync(Guid id)
         {
             return _repository.GetByIdAsync(id);
@@ -21,25 +39,23 @@ namespace SmartWallet.Application.Services
         public async Task<Wallet> CreateAsync(Guid userId, string name, CurrencyCode currencyCode, string alias, decimal initialBalance = 0)
         {
             var wallet = new Wallet(userId, name, currencyCode, alias, initialBalance);
-            await _repository.AddAsync(wallet); // ahora sí esperás la operación asíncrona
+            await _repository.AddAsync(wallet);
             return wallet;
         }
 
-        public Task<bool> ExistsAsync(Guid id)
+        public async Task<bool> ExistsAsync(Guid id)
         {
-            throw new NotImplementedException();
+            return await _repository.ExistsAsync(id);
         }
 
-        public Task AddAsync(Wallet wallet)
+        public async Task AddAsync(Wallet wallet)
         {
-            throw new NotImplementedException();
+            await _repository.AddAsync(wallet);
         }
 
-        public Task UpdateAsync(Wallet wallet)
+        public async Task UpdateAsync(Wallet wallet)
         {
-            throw new NotImplementedException();
+            await _repository.UpdateAsync(wallet);
         }
-
-
     }
 }

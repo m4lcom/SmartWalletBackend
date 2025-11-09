@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -9,8 +10,8 @@ using SmartWallet.Application.Abstractions;
 using SmartWallet.Application.Abstractions.Persistence;
 using SmartWallet.Application.Services;
 using SmartWallet.Infrastructure.ExternalServices;
-using SmartWallet.Infrastructure.Persistence.Repositories;
 using SmartWallet.Infrastructure.ExternalServices.Polly;
+using SmartWallet.Infrastructure.Persistence.Repositories;
 using System;
 using System.Text;
 using AuthenticationService = SmartWallet.Infrastructure.ExternalServices.AuthenticationService;
@@ -39,13 +40,13 @@ public static class ServiceCollectionExtensions
 
         // --- Servicio de Autenticación ---
         services.AddJwtAuthentication(configuration);
-        
+        services.AddAuthorizationPolicies();
         // ---Servicios Externos
         services.AddDolarApi(configuration);
 
         // --- DbContext ---
         services.AddDbContext<SmartWalletDbContext>(options =>
-            options.UseSqlite(configuration.GetConnectionString("DefaultConnection")));
+            options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
 
         return services;
     }
@@ -75,6 +76,41 @@ public static class ServiceCollectionExtensions
             };
         });
 
+        return services;
+    }
+    public static IServiceCollection AddAuthorizationPolicies(this IServiceCollection services)
+    {
+        services.AddAuthorization(options =>
+        {
+            options.AddPolicy("SameUserOrAdmin", policy =>
+                policy.RequireAssertion(context =>
+                {
+                    var user = context.User;
+                    if (user.IsAdmin()) return true;
+
+                    var tokenUserId = user.GetUserId();
+                    var tokenEmail = user.GetUserEmail();
+                    var httpContext = context.Resource as HttpContext;
+                    if (httpContext == null)
+                        return false;
+
+                    var routeValues = httpContext.Request.RouteValues;
+
+                    if (routeValues.TryGetValue("userId", out var routeUserIdObj)
+                        && Guid.TryParse(routeUserIdObj?.ToString(), out var routeUserId))
+                    {
+                        return tokenUserId == routeUserId;
+                    }
+
+                    if (routeValues.TryGetValue("email", out var routeEmailObj)
+                        && routeEmailObj is string routeEmail)
+                    {
+                        return string.Equals(routeEmail, tokenEmail, StringComparison.OrdinalIgnoreCase);
+                    }
+
+                    return false;
+                }));
+        });
         return services;
     }
 

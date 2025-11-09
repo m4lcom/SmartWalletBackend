@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SmartWallet.Domain.Entities;
+using SmartWallet.Infrastructure.Extensions;
 
 
 namespace SmartWallet.Infrastructure
@@ -53,6 +54,8 @@ namespace SmartWallet.Infrastructure
                       .HasForeignKey(l => l.WalletId)
                       .OnDelete(DeleteBehavior.Restrict);
             });
+
+            modelBuilder.Seed(); // Llamada al método de extensión para sembrar datos
         }
     }
 }
