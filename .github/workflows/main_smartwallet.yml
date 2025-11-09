@@ -64,9 +64,17 @@ jobs:
         run: dotnet tool install --global dotnet-ef --version 8.*
           
       - name: Update database with EF Core migrations
-        run: dotnet ef database update --project src/SmartWallet.Infrastructure/SmartWallet.Infrastructure.csproj --startup-project src/SmartWallet.API/SmartWallet.API.csproj
+        run: dotnet ef database update --project "${{ github.workspace }}/src/SmartWallet.Infrastructure/SmartWallet.Infrastructure.csproj" --startup-project "${{ github.workspace }}/src/SmartWallet.API/SmartWallet.API.csproj"
         env:
           ASPNETCORE_ENVIRONMENT: Production
+
+      - name: Debug workspace layout
+        run: |
+          echo "Workspace: $GITHUB_WORKSPACE"
+          pwd
+          ls -la
+          ls -la src || true
+          ls -la src/SmartWallet.Infrastructure || true
 
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
@@ -75,4 +83,3 @@ jobs:
           app-name: 'Smartwallet'
           slot-name: 'Production'
           package: .
-          
