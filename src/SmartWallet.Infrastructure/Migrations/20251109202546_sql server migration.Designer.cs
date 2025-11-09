@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SmartWallet.Infrastructure;
 
@@ -11,9 +12,11 @@ using SmartWallet.Infrastructure;
 namespace SmartWallet.Infrastructure.Migrations
 {
     [DbContext(typeof(SmartWalletDbContext))]
-    partial class SmartWalletDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251109202546_sql server migration")]
+    partial class sqlservermigration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -140,28 +143,6 @@ namespace SmartWallet.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Users");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("a9f692ac-c922-446c-95dd-d4ad84ced22e"),
-                            Active = true,
-                            CreatedAt = new DateTime(2025, 11, 9, 20, 41, 15, 337, DateTimeKind.Utc).AddTicks(9416),
-                            Email = "albus@mail.com",
-                            Name = "Albus Dumbledore",
-                            PasswordHash = "1234",
-                            Role = 2
-                        },
-                        new
-                        {
-                            Id = new Guid("e89356b7-4ae1-4cb3-a37a-b28b7c8243b0"),
-                            Active = true,
-                            CreatedAt = new DateTime(2025, 11, 9, 20, 41, 15, 337, DateTimeKind.Utc).AddTicks(9421),
-                            Email = "admin@mail.com",
-                            Name = "Admin Admin",
-                            PasswordHash = "1234",
-                            Role = 2
-                        });
                 });
 
             modelBuilder.Entity("SmartWallet.Domain.Entities.Wallet", b =>
