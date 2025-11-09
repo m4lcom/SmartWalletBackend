@@ -43,6 +43,9 @@ jobs:
       contents: read #This is required for actions/checkout
 
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Set up .NET Core
         uses: actions/setup-dotnet@v4
         with:
@@ -61,20 +64,14 @@ jobs:
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_009404B2EC734D30A88CFA7832D39842 }}
       
       - name: Install dotnet-ef tool
-        run: dotnet tool install --global dotnet-ef --version 8.*
+        run: |
+          dotnet tool install --global dotnet-ef --version 8.*
+          echo "PATH=$Env:PATH;$Env:USERPROFILE\.dotnet\tools" >> $GITHUB_ENV
           
       - name: Update database with EF Core migrations
         run: dotnet ef database update --project "${{ github.workspace }}/src/SmartWallet.Infrastructure/SmartWallet.Infrastructure.csproj" --startup-project "${{ github.workspace }}/src/SmartWallet.API/SmartWallet.API.csproj"
         env:
           ASPNETCORE_ENVIRONMENT: Production
-
-      - name: Debug workspace layout
-        run: |
-          echo "Workspace: $GITHUB_WORKSPACE"
-          pwd
-          ls -la
-          ls -la src || true
-          ls -la src/SmartWallet.Infrastructure || true
 
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
