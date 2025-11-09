@@ -80,15 +80,19 @@ public class Wallet
         return Transaction.CreateWithdrawal(Id, amount, currency);
     }
     
-    public Transaction Transfer(Guid destinationWalletId, decimal amount, CurrencyCode currency)
+    public Transaction Transfer(Wallet destinationWallet, decimal amount, CurrencyCode currency)
     {
         Debit(amount);
-        return Transaction.CreateTransfer(Id, destinationWalletId, amount, currency);
+        destinationWallet.ApplyCredit(amount, currency);
+        return Transaction.CreateTransfer(Id, destinationWallet.Id, amount, currency);
     }
 
-    public void Credit(decimal amount, CurrencyCode currency)
+    // --- metodo publico controlado para acreditar ---
+    public void ApplyCredit(decimal amount, CurrencyCode currency)
     {
-        throw new NotImplementedException();
+        if (currency != CurrencyCode) throw new InvalidOperationException("la moneda de la transaccion no coincide con la wallet.");
+        if (amount <= 0) throw new InvalidOperationException("El monto debe ser mayor a cero.");
+        Credit(amount);
     }
 }
 

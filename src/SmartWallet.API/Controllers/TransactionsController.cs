@@ -10,7 +10,7 @@ namespace SmartWallet.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize]
+    //[Authorize]
     public class TransactionsController : ControllerBase
     {
         private readonly ITransactionService _transactionService;
