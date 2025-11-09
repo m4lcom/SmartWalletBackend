@@ -39,8 +39,8 @@ jobs:
     runs-on: windows-latest
     needs: build
     permissions:
-      id-token: write #This is required for requesting the JWT
-      contents: read #This is required for actions/checkout
+      id-token: write # Required for requesting the JWT
+      contents: read # Required for actions/checkout
 
     steps:
       - name: Checkout repository
@@ -50,28 +50,31 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.x'
-    
+
       - name: Download artifact from build job
         uses: actions/download-artifact@v4
         with:
           name: .net-app
-      
+
       - name: Login to Azure
         uses: azure/login@v2
         with:
           client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_F3A380A3B77D44AF83A0C2AD7D9E04D7 }}
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_BD645D025E5D422BA1884217379C67B3 }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_009404B2EC734D30A88CFA7832D39842 }}
-      
+
       - name: Install dotnet-ef tool
         run: |
           dotnet tool install --global dotnet-ef --version 8.*
           echo "PATH=$Env:PATH;$Env:USERPROFILE\.dotnet\tools" >> $GITHUB_ENV
-          
+
       - name: Update database with EF Core migrations
-        run: dotnet ef database update --project "${{ github.workspace }}/src/SmartWallet.Infrastructure/SmartWallet.Infrastructure.csproj" --startup-project "${{ github.workspace }}/src/SmartWallet.API/SmartWallet.API.csproj"
+        working-directory: src/SmartWallet.Infrastructure
+        run: dotnet ef database update --startup-project ../SmartWallet.API
         env:
           ASPNETCORE_ENVIRONMENT: Production
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          DB_PATH: ${{ secrets.DB_PATH }}
 
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
