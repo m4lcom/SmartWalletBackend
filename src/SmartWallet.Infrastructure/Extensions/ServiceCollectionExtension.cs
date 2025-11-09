@@ -46,7 +46,7 @@ public static class ServiceCollectionExtensions
 
         // --- DbContext ---
         services.AddDbContext<SmartWalletDbContext>(options =>
-            options.UseSqlite(configuration.GetConnectionString("DefaultConnection")));
+            options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
 
         return services;
     }

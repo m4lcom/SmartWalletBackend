@@ -31,9 +31,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{02EA681E-C
 		docs\06-transaction-lifecycle.md = docs\06-transaction-lifecycle.md
 		07-transaction-ledger-vertical.md = 07-transaction-ledger-vertical.md
 		docs\08-user-management.md = docs\08-user-management.md
-		docs\changelog.md = docs\changelog.md
 		09-wallet-management.md = 09-wallet-management.md
 		docs\10-httpclient-polly.md = docs\10-httpclient-polly.md
+		docs\changelog.md = docs\changelog.md
 		docs\conventions.md = docs\conventions.md
 		docs\environment.md = docs\environment.md
 		docs\new-feature.md = docs\new-feature.md
@@ -41,6 +41,19 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{02EA681E-C
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Contracts", "src\Contracts\Contracts.csproj", "{F53FC076-A4F7-4B2D-8A4B-F86250E13E17}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Migrations Sqlite", "Migrations Sqlite", "{31E836A7-309A-4780-8330-563DA0984B46}"
+	ProjectSection(SolutionItems) = preProject
+		Migrations Sqlite\20251005204359_InitialCreate.cs = Migrations Sqlite\20251005204359_InitialCreate.cs
+		Migrations Sqlite\20251005204359_InitialCreate.Designer.cs = Migrations Sqlite\20251005204359_InitialCreate.Designer.cs
+		Migrations Sqlite\20251005214940_AddUserEntity.cs = Migrations Sqlite\20251005214940_AddUserEntity.cs
+		Migrations Sqlite\20251005214940_AddUserEntity.Designer.cs = Migrations Sqlite\20251005214940_AddUserEntity.Designer.cs
+		Migrations Sqlite\20251018155430_User Update and Transactions with Legder Refactor.cs = Migrations Sqlite\20251018155430_User Update and Transactions with Legder Refactor.cs
+		Migrations Sqlite\20251018155430_User Update and Transactions with Legder Refactor.Designer.cs = Migrations Sqlite\20251018155430_User Update and Transactions with Legder Refactor.Designer.cs
+		Migrations Sqlite\20251018222932_Rename-UserID-to-Id.cs = Migrations Sqlite\20251018222932_Rename-UserID-to-Id.cs
+		Migrations Sqlite\20251018222932_Rename-UserID-to-Id.Designer.cs = Migrations Sqlite\20251018222932_Rename-UserID-to-Id.Designer.cs
+		Migrations Sqlite\SmartWalletDbContextModelSnapshot.cs = Migrations Sqlite\SmartWalletDbContextModelSnapshot.cs
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
