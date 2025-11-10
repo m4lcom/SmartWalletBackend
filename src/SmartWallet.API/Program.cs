@@ -7,7 +7,8 @@ using SmartWallet.Infrastructure.Persistence.Repositories;
 var builder = WebApplication.CreateBuilder(args);
 
 // --- cargar .env ---
-Env.TraversePath().Load();
+if (File.Exists(".env"))
+    Env.TraversePath().Load();
 
 // --- validar variables ---
 var jwtSecret = Environment.GetEnvironmentVariable("JWT_SECRET");
@@ -17,7 +18,7 @@ if (string.IsNullOrEmpty(jwtSecret) || string.IsNullOrEmpty(dbPath))
     throw new InvalidOperationException("Faltan variables en .env: JWT_SECRET o DB_PATH.");
 
 builder.Configuration["Jwt:Key"] = jwtSecret;
-builder.Configuration["ConnectionStrings:DefaultConnection"] = $"Data Source={dbPath}";
+builder.Configuration["ConnectionStrings:DefaultConnection"] = dbPath;
 
 // --- servicios ---
 builder.Services.AddControllers();
