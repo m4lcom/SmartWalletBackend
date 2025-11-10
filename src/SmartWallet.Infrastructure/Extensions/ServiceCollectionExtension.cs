@@ -46,7 +46,18 @@ public static class ServiceCollectionExtensions
 
         // --- DbContext ---
         services.AddDbContext<SmartWalletDbContext>(options =>
-            options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
+            options.UseSqlServer(
+                configuration.GetConnectionString("DefaultConnection"),
+                sqlOptions =>
+                {
+                    sqlOptions.EnableRetryOnFailure(
+                        maxRetryCount: 5,                        // Reintenta hasta 5 veces
+                        maxRetryDelay: TimeSpan.FromSeconds(10), // Espera entre reintentos
+                        errorNumbersToAdd: null                  // Aplica a errores transitorios comunes
+                    );
+                }
+            )
+        );
 
         return services;
     }

@@ -1,0 +1,88 @@
+# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
+# More GitHub Actions for Azure: https://github.com/Azure/actions
+
+name: Build and deploy ASP.Net Core app to Azure Web App - Smartwallet
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    permissions:
+      contents: read #This is required for actions/checkout
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up .NET Core
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.x'
+
+      - name: Build with dotnet
+        run: dotnet build --configuration Release
+
+      - name: dotnet publish
+        run: dotnet publish -c Release -o "${{env.DOTNET_ROOT}}/myapp"
+
+      - name: Upload artifact for deployment job
+        uses: actions/upload-artifact@v4
+        with:
+          name: .net-app
+          path: ${{env.DOTNET_ROOT}}/myapp
+
+  deploy:
+    runs-on: windows-latest
+    needs: build
+    permissions:
+      id-token: write # Required for requesting the JWT
+      contents: read # Required for actions/checkout
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up .NET Core
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.x'
+
+      - name: Download artifact from build job
+        uses: actions/download-artifact@v4
+        with:
+          name: .net-app
+
+      - name: Login to Azure
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_F3A380A3B77D44AF83A0C2AD7D9E04D7 }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_BD645D025E5D422BA1884217379C67B3 }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_009404B2EC734D30A88CFA7832D39842 }}
+
+      - name: Install dotnet-ef tool
+        run: |
+          dotnet tool install --global dotnet-ef --version 8.*
+          echo "PATH=$Env:PATH;$Env:USERPROFILE\.dotnet\tools" >> $GITHUB_ENV
+
+      - name: Update database with EF Core migrations
+        working-directory: src/SmartWallet.Infrastructure
+        run: dotnet ef database update --startup-project ../SmartWallet.API
+        env:
+          ASPNETCORE_ENVIRONMENT: Production
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          DB_PATH: ${{ secrets.DB_PATH }}
+
+      - name: Deploy to Azure Web App
+        id: deploy-to-webapp
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: 'Smartwallet'
+          slot-name: 'Production'
+          package: ${{ env.DOTNET_ROOT }}/myapp
+        env:
+          DOTNET_ROOT: ${{ env.DOTNET_ROOT }}
+          DB_PATH: ${{ secrets.DB_PATH }}
