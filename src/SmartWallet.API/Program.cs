@@ -6,9 +6,12 @@ using SmartWallet.Infrastructure.Persistence.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var contentRoot = builder.Environment.ContentRootPath;
+var envPath = Path.Combine(contentRoot, ".env");
+
+
 // --- cargar .env ---
-if (File.Exists(".env"))
-    Env.TraversePath().Load();
+DotNetEnv.Env.TraversePath().Load();
 
 // --- validar variables ---
 var jwtSecret = Environment.GetEnvironmentVariable("JWT_SECRET");
