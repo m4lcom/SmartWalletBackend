@@ -14,7 +14,9 @@ if (File.Exists(envFile))
 }
 
 // --- validar variables ---
-var jwtSecret = Environment.GetEnvironmentVariable("JWT_SECRET");
+// --- Obtener variables ---
+var jwtSecret = Environment.GetEnvironmentVariable("JWT_SECRET")
+                ?? builder.Configuration["Jwt:Key"];
 var dbPath = Environment.GetEnvironmentVariable("DB_PATH")
              ?? builder.Configuration.GetConnectionString("DefaultConnection");
 
