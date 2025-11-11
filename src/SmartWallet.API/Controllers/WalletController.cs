@@ -1,18 +1,20 @@
-﻿using System.Linq;
-using Contracts.Requests;
+﻿using Contracts.Requests;
 using Contracts.Responses;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SmartWallet.Application.Services;
 using SmartWallet.Domain.Entities;
 using SmartWallet.Domain.Enums;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace SmartWallet.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    
     public class WalletController : ControllerBase
     {
         private readonly IWalletService _service;
@@ -22,6 +24,7 @@ namespace SmartWallet.API.Controllers
             _service = service;
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         public async Task<ActionResult<List<WalletResponse>>> GetAll()
         {
@@ -42,6 +45,7 @@ namespace SmartWallet.API.Controllers
             return Ok(responses);
         }
 
+        [Authorize(Policy = "SameUserOrAdmin")]
         [HttpGet("by-user/{userId}")]
         public async Task<ActionResult<List<WalletResponse>>> GetByUser(Guid userId)
         {
@@ -64,6 +68,7 @@ namespace SmartWallet.API.Controllers
             return Ok(responses);
         }
 
+        [Authorize(Policy = "SameUserOrAdmin")]
         [HttpGet("by-alias/{alias}")]
         public async Task<ActionResult<WalletResponse>> GetByAlias(string alias)
         {
@@ -86,6 +91,7 @@ namespace SmartWallet.API.Controllers
             return Ok(response);
         }
 
+        [Authorize(Policy = "SameUserOrAdmin")]
         [HttpGet("{id}")]
         public async Task<ActionResult<Wallet>> GetById(Guid id)
         {
@@ -94,6 +100,7 @@ namespace SmartWallet.API.Controllers
             return Ok(wallet);
         }
 
+        [Authorize(Policy = "SameUserOrAdmin")]
         [HttpPost]
         public async Task<ActionResult<WalletResponse>> CreateAsync([FromBody] WalletRequest request)
         {
