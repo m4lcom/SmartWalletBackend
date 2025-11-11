@@ -1,6 +1,7 @@
 ﻿using Contracts.Requests;
-using SmartWallet.Application.Abstractions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SmartWallet.Application.Abstractions;
 
 namespace SmartWallet.API.Controllers;
 
@@ -15,7 +16,9 @@ public class AuthController : ControllerBase
         _authService = authService;
     }
 
+    
     [HttpPost("login")]
+    [AllowAnonymous]
     public async Task<IActionResult> Login([FromBody] LoginRequest request)
     {
         var token = await _authService.AuthenticateAsync(request);
