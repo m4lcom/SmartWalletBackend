@@ -55,6 +55,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: .net-app
+          path: ./publish
 
       - name: Login to Azure
         uses: azure/login@v2
@@ -82,7 +83,6 @@ jobs:
         with:
           app-name: 'Smartwallet'
           slot-name: 'Production'
-          package: ${{ env.DOTNET_ROOT }}/myapp
+          package: ./publish
         env:
-          DOTNET_ROOT: ${{ env.DOTNET_ROOT }}
           DB_PATH: ${{ secrets.DB_PATH }}
