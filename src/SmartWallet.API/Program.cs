@@ -6,11 +6,14 @@ var builder = WebApplication.CreateBuilder(args);
 var jwtSecret = Environment.GetEnvironmentVariable("JWT_SECRET")
                 ?? builder.Configuration["Jwt:Key"];
 
-var connectionString = Environment.GetEnvironmentVariable("DB_CONNECTION")
-                      ?? builder.Configuration.GetConnectionString("DefaultConnection");
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
 if (string.IsNullOrEmpty(jwtSecret) || string.IsNullOrEmpty(connectionString))
     throw new InvalidOperationException("Faltan variables en configuración: Jwt:Key o ConnectionStrings:DefaultConnection.");
+
+// --- setear variables en configuracion ---
+builder.Configuration["Jwt:Key"] = jwtSecret;
+builder.Configuration["ConnectionStrings:DefaultConnection"] = connectionString;
 
 // --- servicios ---
 builder.Services.AddControllers();
