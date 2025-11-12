@@ -31,7 +31,7 @@ namespace SmartWallet.Infrastructure.Extensions
 
             if (user.IsInRole("Admin")) return true;
 
-            var roleClaim = user.FindFirst("role")?.Value;
+            var roleClaim = user.FindFirst(ClaimTypes.Role)?.Value;
             return string.Equals(roleClaim, "Admin", StringComparison.OrdinalIgnoreCase);
         }
     }

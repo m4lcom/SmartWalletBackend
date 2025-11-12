@@ -10,7 +10,6 @@ namespace SmartWallet.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    //[Authorize]
     public class TransactionsController : ControllerBase
     {
         private readonly ITransactionService _transactionService;
@@ -23,6 +22,7 @@ namespace SmartWallet.API.Controllers
         // --- consultas ---
         // --- obtiene una transaccion por id ---
         [HttpGet("{id:guid}")]
+        [Authorize]
         public async Task<IActionResult> GetById(Guid id)
         {
             var transaction = await _transactionService.GetByIdAsync(id);
@@ -32,6 +32,7 @@ namespace SmartWallet.API.Controllers
 
         // --- obtiene todas las transacciones de una wallet especifica ---
         [HttpGet("wallet/{walletId:guid}")]
+        [Authorize]
         public async Task<IActionResult> GetByWallet(Guid walletId)
         {
             var transactions = await _transactionService.GetByWalletAsync(walletId);
@@ -40,6 +41,7 @@ namespace SmartWallet.API.Controllers
 
         // --- obtiene todas las transacciones dentro de un rango de fechas ---
         [HttpGet("range")]
+        [Authorize]
         public async Task<IActionResult> GetByDateRange([FromQuery] DateTime from, [FromQuery] DateTime to)
         {
             var transactions = await _transactionService.GetByDateRangeAsync(from, to);
@@ -49,6 +51,7 @@ namespace SmartWallet.API.Controllers
         // --- operaciones de dominio ---
         // --- crear deposito ---
         [HttpPost("deposits")]
+        [Authorize]
         public async Task<IActionResult> Deposit([FromBody] DepositRequest request)
         {
             var currency = Enum.Parse<CurrencyCode>(request.CurrencyCode, ignoreCase: true);
@@ -62,19 +65,22 @@ namespace SmartWallet.API.Controllers
 
         // --- crear retiro ---
         [HttpPost("withdrawals")]
+        [Authorize]
         public async Task<IActionResult> Withdrawal([FromBody] WithdrawalRequest request)
         {
-            var currency = Enum.Parse<CurrencyCode>(request.CurrencyCode, ignoreCase: true);
             var transaction = await _transactionService.CreateWithdrawalAsync(
                 request.WalletId,
                 request.Amount,
-                currency
+                Enum.Parse<CurrencyCode>(request.CurrencyCode, ignoreCase: true)
             );
+
             return Ok(MapToResponse(transaction));
         }
 
+
         // --- crear transferencia ---
         [HttpPost("transfers")]
+        [Authorize]
         public async Task<IActionResult> Transfer([FromBody] TransferRequest request)
         {
             var currency = Enum.Parse<CurrencyCode>(request.CurrencyCode, ignoreCase: true);
@@ -88,6 +94,7 @@ namespace SmartWallet.API.Controllers
         }
         // --- marca una transaccion como fallida ---
         [HttpPatch("{id:guid}/fail")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> MarkAsFailed(Guid id)
         {
             var transaction = await _transactionService.MarkAsFailedAsync(id);
@@ -96,6 +103,7 @@ namespace SmartWallet.API.Controllers
 
         // --- marca una transaccion como cancelada ---
         [HttpPatch("{id:guid}/cancel")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> MarkAsCanceled(Guid id)
         {
             var transaction = await _transactionService.MarkAsCanceledAsync(id);
