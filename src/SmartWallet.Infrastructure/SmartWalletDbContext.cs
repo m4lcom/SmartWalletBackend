@@ -51,7 +51,6 @@ namespace SmartWallet.Infrastructure
                 entity.HasOne(l => l.Wallet)
                       .WithMany()
                       .HasForeignKey(l => l.WalletId)
-                      .HasForeignKey(l => l.WalletId)
                       .OnDelete(DeleteBehavior.Restrict);
             });
 
