@@ -106,26 +106,57 @@ namespace SmartWallet.Infrastructure.Extensions
                     policy.RequireAssertion(context =>
                     {
                         var user = context.User;
-                        if (user.IsAdmin()) return true;
-
-                        var tokenUserId = user.GetUserId();
-                        var tokenEmail = user.GetUserEmail();
-                        var httpContext = context.Resource as HttpContext;
-                        if (httpContext == null)
+                        if (user == null)
                             return false;
 
-                        var routeValues = httpContext.Request.RouteValues;
+                        // Si es admin, permite todo
+                        if (user.IsAdmin())
+                            return true;
 
-                        if (routeValues.TryGetValue("userId", out var routeUserIdObj)
-                            && Guid.TryParse(routeUserIdObj?.ToString(), out var routeUserId))
+                        Guid tokenUserId;
+                        var tokenUserIdNullable = user.GetUserId();
+                        tokenUserId = tokenUserIdNullable ?? Guid.Empty;
+
+                        var tokenEmail = user.GetUserEmail();
+
+                        // Extraer RouteValues desde distintos recursos posibles
+                        Microsoft.AspNetCore.Routing.RouteValueDictionary? routeValues = null;
+
+                        if (context.Resource is Microsoft.AspNetCore.Mvc.Filters.AuthorizationFilterContext mvcCtx)
                         {
-                            return tokenUserId == routeUserId;
+                            routeValues = mvcCtx.RouteData.Values;
+                        }
+                        else if (context.Resource is HttpContext httpCtx)
+                        {
+                            routeValues = httpCtx.Request.RouteValues;
                         }
 
-                        if (routeValues.TryGetValue("email", out var routeEmailObj)
-                            && routeEmailObj is string routeEmail)
+                        if (routeValues == null)
+                            return false;
+
+                        // Comprobar claves comunes para id de usuario
+                        if (routeValues.TryGetValue("userId", out var routeUserIdObj)
+                            || routeValues.TryGetValue("id", out routeUserIdObj)
+                            || routeValues.TryGetValue("userid", out routeUserIdObj)
+                            || routeValues.TryGetValue("user_id", out routeUserIdObj))
                         {
-                            return string.Equals(routeEmail, tokenEmail, StringComparison.OrdinalIgnoreCase);
+                            if (Guid.TryParse(routeUserIdObj?.ToString(), out var routeUserId))
+                            {
+                                if (tokenUserId != Guid.Empty && tokenUserId == routeUserId)
+                                    return true;
+                            }
+                        }
+
+                        // Comprobar por email en ruta
+                        if (routeValues.TryGetValue("email", out var routeEmailObj)
+                            || routeValues.TryGetValue("Email", out routeEmailObj))
+                        {
+                            if (routeEmailObj is string routeEmail
+                                && !string.IsNullOrWhiteSpace(tokenEmail)
+                                && string.Equals(routeEmail, tokenEmail, StringComparison.OrdinalIgnoreCase))
+                            {
+                                return true;
+                            }
                         }
 
                         return false;
