@@ -20,7 +20,7 @@ builder.Services.AddSmartWalletInfrastructure(builder.Configuration);
 var app = builder.Build();
 
 // --- validar configuración ---
-if (app.Environment.IsProduction())
+if (!app.Environment.IsDevelopment())
 {
     if (string.IsNullOrEmpty(jwtSecret) || string.IsNullOrEmpty(connectionString))
         throw new InvalidOperationException("Faltan variables en configuración: Jwt:Key o ConnectionStrings:DefaultConnection.");
