@@ -10,12 +10,14 @@ namespace SmartWallet.Application.Services
         private readonly ITransactionRepository _transactionRepository;
         private readonly ITransactionLedgerRepository _ledgerRepository;
         private readonly IWalletRepository _walletRepository;
+        private readonly ICurrentUserService _currentUserService;
 
-        public TransactionService(ITransactionRepository transactionRepository, ITransactionLedgerRepository ledgerRepository, IWalletRepository walletRepository)
+        public TransactionService(ITransactionRepository transactionRepository, ITransactionLedgerRepository ledgerRepository, IWalletRepository walletRepository, ICurrentUserService currentUserService)
         {
             _transactionRepository = transactionRepository;
             _ledgerRepository = ledgerRepository;
             _walletRepository = walletRepository;
+            _currentUserService = currentUserService;
         }
 
         // --- consultas ---
@@ -34,6 +36,12 @@ namespace SmartWallet.Application.Services
         {
             var wallet = await _walletRepository.GetByIdAsync(walletId) ?? throw new KeyNotFoundException("Wallet no encontrada.");
 
+            var userId = _currentUserService.GetUserId();
+            var isAdmin = _currentUserService.IsAdmin();
+
+            if (!isAdmin && wallet.UserID != userId)
+                throw new UnauthorizedAccessException("No puedes operar sobre una wallet que no es tuya");
+
             var transaction = wallet.Deposit(amount, currency);
 
             await _transactionRepository.AddAsync(transaction);
@@ -49,6 +57,12 @@ namespace SmartWallet.Application.Services
         public async Task<Transaction> CreateWithdrawalAsync(Guid walletId, decimal amount, CurrencyCode currency)
         {
             var wallet = await _walletRepository.GetByIdAsync(walletId) ?? throw new KeyNotFoundException("Wallet no encontrada.");
+
+            var userId = _currentUserService.GetUserId();
+            var isAdmin = _currentUserService.IsAdmin();
+
+            if (!isAdmin && wallet.UserID != userId)
+                throw new UnauthorizedAccessException("No puedes operar sobre una wallet que no es tuya");
 
             var transaction = wallet.Withdrawal(amount, currency);
 
@@ -69,7 +83,13 @@ namespace SmartWallet.Application.Services
             var sourceWallet = await _walletRepository.GetByIdAsync(sourceWalletId) ?? throw new KeyNotFoundException("Wallet origen no encontrada.");
 
             var destinationWallet = await _walletRepository.GetByIdAsync(destinationWalletId) ?? throw new KeyNotFoundException("Wallet destino no encontrada.");
-            
+
+            var userId = _currentUserService.GetUserId();
+            var isAdmin = _currentUserService.IsAdmin();
+
+            if (!isAdmin && sourceWallet.UserID != userId)
+                throw new UnauthorizedAccessException("No puedes operar sobre una wallet que no es tuya");
+
             // --- logica de dominio: debitar origen y acreditar destino ---
             var transaction = sourceWallet.Transfer(destinationWallet, amount, currency);
 

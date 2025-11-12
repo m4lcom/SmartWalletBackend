@@ -38,7 +38,7 @@ public class AuthenticationService : IAuthenticationService
             new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
             new Claim(JwtRegisteredClaimNames.Email, user.Email),
             new Claim("name", user.Name),
-            new Claim("role", user.Role.ToString())
+            new Claim(ClaimTypes.Role, user.Role.ToString())
         };
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:key"]!));
@@ -48,7 +48,7 @@ public class AuthenticationService : IAuthenticationService
             issuer: _config["Jwt:Issuer"],
             audience: _config["Jwt:Audience"],
             claims: claims,
-            expires: DateTime.Now.AddMinutes(int.Parse(_config["Jwt:ExpireMinutes"]!)),
+            expires: DateTime.UtcNow.AddMinutes(int.Parse(_config["Jwt:ExpireMinutes"]!)),
             signingCredentials: creds
         );
 
