@@ -30,18 +30,22 @@ namespace SmartWallet.Infrastructure
                       .HasColumnType("decimal(18,2)")
                       .IsRequired();
 
-                entity.Property(t => t.CurrencyCode)
-                      .IsRequired();
+                entity.Property(t => t.CurrencyCode).IsRequired();
+                entity.Property(t => t.Type).IsRequired();
+                entity.Property(t => t.Status).IsRequired();
+                entity.Property(t => t.CreatedAt).IsRequired();
 
-                entity.Property(t => t.Type)
-                      .IsRequired();
+                // relación con Wallet origen
+                entity.HasOne(t => t.Wallet)
+                      .WithMany(w => w.Transactions)
+                      .HasForeignKey(t => t.WalletId)
+                      .OnDelete(DeleteBehavior.Restrict);
 
-                entity.Property(t => t.Status)
-                      .IsRequired();
-
-                entity.Property(t => t.CreatedAt)
-                      .IsRequired();
-
+                // relación con Wallet destino
+                entity.HasOne(t => t.DestinationWallet)
+                      .WithMany(w => w.ReceivedTransfers)
+                      .HasForeignKey(t => t.DestinationWalletId)
+                      .OnDelete(DeleteBehavior.Restrict);
             });
 
             // --- TransactionLedger ---
@@ -53,24 +57,23 @@ namespace SmartWallet.Infrastructure
                       .HasColumnType("decimal(18,2)")
                       .IsRequired();
 
-                entity.Property(l => l.CurrencyCode)
-                      .IsRequired();
+                entity.Property(l => l.CurrencyCode).IsRequired();
+                entity.Property(l => l.Type).IsRequired();
+                entity.Property(l => l.Status).IsRequired();
+                entity.Property(l => l.Timestamp).IsRequired();
 
-                entity.Property(l => l.Type)
-                      .IsRequired();
-
-                entity.Property(l => l.Status)
-                      .IsRequired();
-
-                entity.Property(l => l.Timestamp)
-                      .IsRequired();
-
+                // relación con Wallet
+                entity.HasOne(l => l.Wallet)
+                      .WithMany(w => w.TransactionLedgers)
+                      .HasForeignKey(l => l.WalletId)
+                      .OnDelete(DeleteBehavior.Restrict);
             });
 
             // --- seed inicial ---
             modelBuilder.Seed();
         }
 
-    
+
+
     }
 }

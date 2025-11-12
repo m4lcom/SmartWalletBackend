@@ -32,9 +32,9 @@ public class Wallet
 
 
     // Navegaciones inversas
-    public ICollection<TransactionLedger> SourceLedgers { get; private set; } = new List<TransactionLedger>();
-    public ICollection<TransactionLedger> DestinationLedgers { get; private set; } = new List<TransactionLedger>();
-    public ICollection<Transaction> ReceivedTransfers { get; private set; } = new List<Transaction>();
+    public ICollection<Transaction> Transactions { get; private set; } = new List<Transaction>(); // origen
+    public ICollection<Transaction> ReceivedTransfers { get; private set; } = new List<Transaction>(); // destino
+    public ICollection<TransactionLedger> TransactionLedgers { get; private set; } = new List<TransactionLedger>(); // asientos
 
 
     // --- constructores ---
