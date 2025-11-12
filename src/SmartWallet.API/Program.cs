@@ -3,8 +3,10 @@ using SmartWallet.Infrastructure.Extensions;
 var builder = WebApplication.CreateBuilder(args);
 
 // --- validar configuración ---
-var jwtSecret = builder.Configuration["Jwt:Key"];
-var dbPath = builder.Configuration.GetConnectionString("DefaultConnection");
+var jwtSecret = Environment.GetEnvironmentVariable("JWT_SECRET")
+                ?? builder.Configuration["Jwt:Key"];
+var dbPath = Environment.GetEnvironmentVariable("DB_PATH")
+             ?? builder.Configuration.GetConnectionString("DefaultConnection");
 
 if (string.IsNullOrEmpty(jwtSecret) || string.IsNullOrEmpty(dbPath))
     throw new InvalidOperationException("Faltan variables en configuración: Jwt:Key o ConnectionStrings:DefaultConnection.");
