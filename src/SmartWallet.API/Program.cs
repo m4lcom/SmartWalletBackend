@@ -8,9 +8,6 @@ var jwtSecret = Environment.GetEnvironmentVariable("JWT_SECRET")
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
-if (string.IsNullOrEmpty(jwtSecret) || string.IsNullOrEmpty(connectionString))
-    throw new InvalidOperationException("Faltan variables en configuración: Jwt:Key o ConnectionStrings:DefaultConnection.");
-
 // --- setear variables en configuracion ---
 builder.Configuration["Jwt:Key"] = jwtSecret;
 builder.Configuration["ConnectionStrings:DefaultConnection"] = connectionString;
@@ -21,6 +18,13 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSmartWalletInfrastructure(builder.Configuration);
 
 var app = builder.Build();
+
+// --- validar configuración ---
+if (app.Environment.IsProduction())
+{
+    if (string.IsNullOrEmpty(jwtSecret) || string.IsNullOrEmpty(connectionString))
+        throw new InvalidOperationException("Faltan variables en configuración: Jwt:Key o ConnectionStrings:DefaultConnection.");
+}
 
 // --- pipeline ---
 if (app.Environment.IsDevelopment())
