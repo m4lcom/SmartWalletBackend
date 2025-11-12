@@ -75,7 +75,7 @@ jobs:
         env:
           ASPNETCORE_ENVIRONMENT: Production
           Jwt__Key: ${{ secrets.JWT_SECRET }}
-          ConnectionString__DefaultConnection: ${{ secrets.AZURE_SQL_CONNECTION }}
+          ConnectionStrings__DefaultConnection: ${{ secrets.AZURE_SQL_CONNECTION }}
 
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
