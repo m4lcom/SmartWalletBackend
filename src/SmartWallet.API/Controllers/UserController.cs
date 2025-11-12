@@ -51,44 +51,44 @@ namespace SmartWallet.API.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> RegisterUser([FromBody] UserRegisterRequest request)
         {
-            var result = await _userServices.RegisterUser(request);
-            if (!result)
+            var userWithWallet = await _userServices.RegisterUser(request);
+            if (userWithWallet is null)
                 return BadRequest();
 
-            return Ok();
+            return CreatedAtAction(nameof(GetUserById), new { userId = userWithWallet.Id }, userWithWallet);
         }
 
         [Authorize(Roles = "Admin")]
         [HttpPost("create")]
         public async Task<IActionResult> CreateAdminUser([FromBody] UserCreateRequest request)
         {
-            var result = await _userServices.CreateAdminUser(request);
-            if (!result)
+            var createdUser = await _userServices.CreateAdminUser(request);
+            if (createdUser is null)
                 return BadRequest();
 
-            return Ok();
+            return CreatedAtAction(nameof(GetUserById), new { userId = createdUser.Id }, createdUser);
         }
 
         [Authorize(Policy = "SameUserOrAdmin")]
         [HttpPut("{id:guid}")]
         public async Task<IActionResult> UpdateUser(Guid id, [FromBody] UserUpdateDataRequest request)
         {
-            var result = await _userServices.UpdateUser(id, request);
-            if (!result)
+            var updated = await _userServices.UpdateUser(id, request);
+            if (updated is null)
                 return BadRequest();
 
-            return Ok();
+            return Ok(updated);
         }
 
         [Authorize(Roles = "Admin")]
         [HttpPut("{id:guid}/active")]
         public async Task<IActionResult> ChangeUserActiveStatus(Guid id)
         {
-            var result = await _userServices.ChangeUserActiveStatus(id);
-            if (!result)
+            var changed = await _userServices.ChangeUserActiveStatus(id);
+            if (changed is null)
                 return BadRequest();
 
-            return Ok();
+            return Ok(changed);
         }
 
         [Authorize(Policy = "SameUserOrAdmin")]
